@@ -1,0 +1,2920 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hisobchi.uz — Pro Platform</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+:root {
+  --green:#1D9E75;--green-l:#E1F5EE;--green-m:#5DCAA5;--green-d:#0F6E56;
+  --red:#E24B4A;--red-l:#FCEBEB;--amber:#BA7517;--amber-l:#FAEEDA;
+  --blue:#378ADD;--blue-l:#E6F1FB;--purple:#7F77DD;
+  --bg:#F4F6F9;--bg2:#ECEEF2;--card:#fff;--border:#E2E6EC;
+  --text:#1A1D23;--text2:#6B7280;--text3:#9CA3AF;--sw:230px;
+}
+[data-theme="dark"] {
+  --bg:#0F1117;--bg2:#1A1D27;--card:#1E2130;--border:#2D3148;
+  --text:#E8EAF0;--text2:#9BA3B8;--text3:#5C6480;
+  --green-l:#0D2D20;--red-l:#2D1515;--amber-l:#2A1F0A;--blue-l:#0D1F35;
+}
+[data-theme="dark"] .topbar,[data-theme="dark"] .sidebar,[data-theme="dark"] .fbar { background:var(--card); }
+[data-theme="dark"] .btn-sm { background:var(--bg2);color:var(--text2); }
+[data-theme="dark"] .btn-sm:hover { background:var(--border); }
+[data-theme="dark"] .fbar select,[data-theme="dark"] .fbar input { background:var(--bg2);color:var(--text);border-color:var(--border); }
+[data-theme="dark"] .tbl th { background:var(--bg2); }
+[data-theme="dark"] .tbl tr:hover td { background:var(--bg2); }
+[data-theme="dark"] .form-row input,[data-theme="dark"] .form-row select,[data-theme="dark"] .form-row textarea { background:var(--bg2);color:var(--text);border-color:var(--border); }
+[data-theme="dark"] .modal { background:var(--card); }
+[data-theme="dark"] .cabinet-panel { background:var(--card); }
+[data-theme="dark"] .stat-card { background:var(--bg2); }
+[data-theme="dark"] .tariff-card { border-color:var(--border);background:var(--bg2); }
+[data-theme="dark"] .tariff-card.active { background:var(--green-l); }
+[data-theme="dark"] .kpi { background:var(--card); }
+[data-theme="dark"] .lang-btn { background:var(--bg2);color:var(--text2);border-color:var(--border); }
+[data-theme="dark"] .lang-btn.active { background:var(--green-l);color:var(--green-m); }
+[data-theme="dark"] .total-row td { background:var(--bg2)!important; }
+
+/* AUTH SCREEN */
+.auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#0a1628 0%,#0d2b1f 50%,#0a1628 100%);display:flex;align-items:center;justify-content:center;z-index:1000}
+.auth-box{background:#1E2130;border:1px solid #2D3148;border-radius:16px;padding:36px 32px;width:420px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.auth-logo{text-align:center;margin-bottom:24px}
+.auth-logo-ico{width:48px;height:48px;background:var(--green);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.auth-logo-txt{font-size:22px;font-weight:700;color:#fff}.auth-logo-txt span{color:var(--green)}
+.auth-sub{font-size:12px;color:#9BA3B8;text-align:center;margin-bottom:28px}
+.auth-tabs{display:flex;gap:0;margin-bottom:24px;background:#0F1117;border-radius:8px;padding:3px}
+.auth-tab{flex:1;padding:8px;border-radius:6px;border:none;background:transparent;font-size:13px;font-weight:600;cursor:pointer;color:#5C6480;transition:all .15s}
+.auth-tab.active{background:var(--green);color:#fff}
+.auth-field{margin-bottom:14px}
+.auth-field label{display:block;font-size:11px;font-weight:600;color:#9BA3B8;margin-bottom:5px}
+.auth-field input{width:100%;padding:10px 12px;background:#0F1117;border:1px solid #2D3148;border-radius:8px;color:#fff;font-size:13px;font-family:inherit}
+.auth-field input:focus{outline:none;border-color:var(--green)}
+.auth-btn{width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;transition:background .15s}
+.auth-btn:hover{background:var(--green-d)}
+.auth-err{color:#E24B4A;font-size:12px;text-align:center;margin-top:8px;min-height:18px}
+.auth-footer{text-align:center;margin-top:16px;font-size:11px;color:#5C6480}
+
+/* COMPANY SWITCHER */
+.co-switcher{display:flex;gap:6px;align-items:center}
+.co-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);font-size:11px;font-weight:600;cursor:pointer;color:var(--text2);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.co-btn:hover{border-color:var(--green-m);color:var(--green-d)}
+
+/* THEME TOGGLE */
+.theme-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.theme-btn:hover{background:var(--bg2)}
+
+/* ADMIN PANEL */
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:14px}
+.admin-section{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:15px}
+.admin-section h4{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.user-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.user-row:last-child{border-bottom:none}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:12px;font-weight:600;color:var(--text)}
+.user-meta{font-size:10px;color:var(--text3)}
+.admin-stat{text-align:center;padding:14px;background:var(--bg);border-radius:8px}
+.admin-stat-val{font-size:22px;font-weight:700;color:var(--green)}
+.admin-stat-lbl{font-size:11px;color:var(--text2);margin-top:2px}
+.plan-badge-sm{display:inline-block;padding:1px 7px;border-radius:10px;font-size:9px;font-weight:700}
+.pb-free{background:#f3f4f6;color:#374151}
+.pb-pro{background:var(--green-l);color:var(--green-d)}
+.pb-biz{background:#f0efff;color:#3730a3}
+.editable-input{padding:5px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;background:var(--card);color:var(--text);font-family:inherit;width:100%}
+
+/* COMPANY SELECT MODAL */
+.company-select-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:700;display:none;align-items:center;justify-content:center}
+.company-select-overlay.open{display:flex}
+.company-select-box{background:var(--card);border-radius:14px;padding:24px;width:480px;max-width:95vw;max-height:80vh;overflow-y:auto}
+.company-card{border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px}
+.company-card:hover{border-color:var(--green-m);background:var(--green-l)}
+.company-card.active-co{border-color:var(--green);background:var(--green-l)}
+.company-ico{width:40px;height:40px;border-radius:10px;background:var(--green);color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:13px}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:52px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.logo-ico{width:30px;height:30px;background:var(--green);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.logo-txt{font-size:15px;font-weight:700;color:var(--text)}
+.logo-txt span{color:var(--green)}
+.tb-center{display:flex;gap:8px;align-items:center}
+.tb-right{display:flex;gap:6px;align-items:center}
+.btn-sm{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:var(--card);font-size:11px;font-weight:600;cursor:pointer;color:var(--text2);transition:all .15s}
+.btn-sm:hover{background:var(--bg)}
+.btn-green{background:var(--green);color:#fff;border-color:var(--green)}
+.btn-green:hover{background:var(--green-d);color:#fff}
+.btn-green-o{background:var(--green-l);color:var(--green-d);border-color:var(--green-m)}
+.lang-btn{padding:4px 9px;border-radius:5px;border:1px solid var(--border);background:var(--card);font-size:11px;font-weight:700;cursor:pointer;color:var(--text2)}
+.lang-btn.active{background:var(--green-l);color:var(--green-d);border-color:var(--green-m)}
+.avatar-btn{width:32px;height:32px;border-radius:50%;background:var(--green);color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* ── FILTER BAR ── */
+.fbar{display:flex;gap:8px;align-items:center;padding:8px 20px;background:var(--card);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.fbar select,.fbar input{padding:5px 8px;border:1px solid var(--border);border-radius:5px;background:#fff;font-size:12px;color:var(--text)}
+.fbar label{font-size:11px;color:var(--text2);font-weight:500}
+
+/* ── LAYOUT ── */
+.layout{display:flex;height:calc(100vh - 52px - 46px)}
+.sidebar{width:var(--sw);flex-shrink:0;background:var(--card);border-right:1px solid var(--border);padding:10px 0;overflow-y:auto}
+.sb-sec{margin-bottom:4px}
+.sb-lbl{font-size:10px;font-weight:700;color:var(--text3);padding:8px 16px 3px;text-transform:uppercase;letter-spacing:.6px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 16px;cursor:pointer;font-size:12px;color:var(--text2);border-left:2px solid transparent;transition:all .12s}
+.sb-item:hover{background:var(--bg);color:var(--text)}
+.sb-item.active{background:var(--green-l);color:var(--green-d);font-weight:600;border-left-color:var(--green)}
+.sb-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.main{flex:1;padding:20px 24px;overflow-y:auto}
+
+/* ── PAGES ── */
+.page{display:none}
+.page.active{display:block;animation:fi .2s ease}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.pg-title{font-size:18px;font-weight:700;margin-bottom:2px}
+.pg-sub{font-size:12px;color:var(--text2);margin-bottom:16px}
+
+/* ── CARDS & GRIDS ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:13px 15px;transition:box-shadow .15s}
+.kpi:hover{box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.kpi-lbl{font-size:11px;color:var(--text2);margin-bottom:4px}
+.kpi-val{font-size:20px;font-weight:700;line-height:1}
+.kpi-delta{font-size:11px;margin-top:3px;color:var(--text3)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:15px;margin-bottom:14px}
+.card-title{font-size:13px;font-weight:600;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.chart-h200{position:relative;height:200px}
+.chart-h240{position:relative;height:240px}
+.chart-h180{position:relative;height:180px}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:8px 11px;text-align:left;color:var(--text2);font-weight:600;border-bottom:1px solid var(--border);background:var(--bg);font-size:11px;position:sticky;top:0;z-index:2}
+.tbl td{padding:8px 11px;border-bottom:1px solid var(--border)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--bg)}
+.tbl-wrap{max-height:420px;overflow-y:auto;border:1px solid var(--border);border-radius:8px}
+.total-row td{font-weight:700;background:var(--bg)!important}
+
+/* ── BADGES ── */
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700}
+.bg{background:var(--green-l);color:var(--green-d)}
+.br{background:var(--red-l);color:#a32d2d}
+.ba{background:var(--amber-l);color:#633806}
+.bb{background:var(--blue-l);color:#0c447c}
+.bp{background:#f0efff;color:#3730a3}
+
+/* ── AMOUNTS ── */
+.ap{color:var(--green);font-weight:600}
+.am{color:var(--red);font-weight:600}
+.G{color:var(--green)}
+.R{color:var(--red)}
+.A{color:var(--amber)}
+
+/* ── BARS ── */
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.bar-lbl{font-size:11px;color:var(--text2);min-width:100px}
+.bar-track{flex:1;height:7px;background:var(--bg2);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.bar-val{font-size:11px;font-weight:600;min-width:55px;text-align:right}
+
+/* ── INDUSTRY TABS ── */
+.ind-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.ind-tab{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);font-size:12px;font-weight:600;cursor:pointer;color:var(--text2);transition:all .15s}
+.ind-tab:hover{border-color:var(--green-m);color:var(--green-d)}
+.ind-tab.active{background:var(--green);color:#fff;border-color:var(--green)}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:500;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;padding:24px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:16px}
+.form-row{display:grid;gap:10px}
+.form-row input,.form-row select,.form-row textarea{padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;width:100%;font-family:inherit}
+.form-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-lbl{font-size:11px;color:var(--text2);font-weight:600;margin-bottom:3px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+
+/* ── CABINET ── */
+.cabinet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:600;align-items:flex-start;justify-content:flex-end}
+.cabinet-overlay.open{display:flex}
+.cabinet-panel{background:#fff;width:360px;height:100vh;padding:24px;overflow-y:auto;box-shadow:-4px 0 20px rgba(0,0,0,.12)}
+.cab-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.cab-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green-d));color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;margin:0 auto 12px}
+.cab-name{font-size:16px;font-weight:700;text-align:center;margin-bottom:2px}
+.cab-email{font-size:12px;color:var(--text2);text-align:center;margin-bottom:20px}
+.plan-card{background:linear-gradient(135deg,var(--green),#0a7a58);border-radius:12px;padding:16px;color:#fff;margin-bottom:16px}
+.plan-card h4{font-size:14px;font-weight:700;margin-bottom:4px}
+.plan-card p{font-size:12px;opacity:.85}
+.plan-badge{display:inline-block;background:rgba(255,255,255,.25);padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:8px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.stat-card{background:var(--bg);border-radius:8px;padding:12px;text-align:center}
+.stat-val{font-size:18px;font-weight:700;color:var(--green)}
+.stat-lbl{font-size:11px;color:var(--text2);margin-top:2px}
+.cab-section{margin-bottom:16px}
+.cab-section h5{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.cab-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;cursor:pointer;transition:background .12s}
+.cab-item:hover{background:var(--bg)}
+.cab-item span{font-size:12px;color:var(--text2)}
+.tariff-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.tariff-card{border:1.5px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:all .15s}
+.tariff-card:hover{border-color:var(--green-m)}
+.tariff-card.active{border-color:var(--green);background:var(--green-l)}
+.tariff-name{font-size:12px;font-weight:700;margin-bottom:4px}
+.tariff-price{font-size:16px;font-weight:700;color:var(--green)}
+.tariff-per{font-size:10px;color:var(--text2)}
+.tariff-features{font-size:10px;color:var(--text2);margin-top:6px;line-height:1.5;text-align:left}
+
+/* ── NOTIFICATION ── */
+.notif{position:fixed;bottom:20px;right:20px;background:#1a1d23;color:#fff;padding:12px 20px;border-radius:10px;font-size:12px;font-weight:600;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none}
+.notif.show{opacity:1;transform:translateY(0)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){.two-col,.three-col{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div class="auth-screen" id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="auth-logo-ico"><svg width="22" height="22" viewBox="0 0 18 18"><rect x="2" y="9" width="3" height="7" rx="1" fill="white"/><rect x="7.5" y="5" width="3" height="11" rx="1" fill="white"/><rect x="13" y="2" width="3" height="14" rx="1" fill="white"/></svg></div>
+      <div class="auth-logo-txt">Hisob<span>chi</span>.uz</div>
+    </div>
+    <div class="auth-sub">Профессиональный финансовый учёт для бизнеса</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="auth-tab-login" onclick="switchAuthTab('login')">Войти</button>
+      <button class="auth-tab" id="auth-tab-register" onclick="switchAuthTab('register')">Регистрация</button>
+    </div>
+    <div id="auth-login">
+      <div class="auth-field"><label>Email</label><input type="email" id="a-email" placeholder="company@email.com"></div>
+      <div class="auth-field"><label>Пароль</label><input type="password" id="a-pass" placeholder="••••••••"></div>
+      <button class="auth-btn" onclick="doLogin()">Войти</button>
+      <div class="auth-footer">Демо: <b>demo@hisobchi.uz</b> / <b>demo123</b></div>
+    </div>
+    <div id="auth-register" style="display:none">
+      <div class="auth-field"><label>Название компании</label><input type="text" id="r-company" placeholder="ООО Ваша Компания"></div>
+      <div class="auth-field"><label>Email</label><input type="email" id="r-email" placeholder="you@company.com"></div>
+      <div class="auth-field"><label>Пароль</label><input type="password" id="r-pass" placeholder="Минимум 6 символов"></div>
+      <button class="auth-btn" onclick="doRegister()">Создать аккаунт</button>
+    </div>
+    <div class="auth-err" id="auth-err"></div>
+  </div>
+</div>
+
+<!-- COMPANY SELECT -->
+<div class="company-select-overlay" id="co-select-overlay">
+  <div class="company-select-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:16px;font-weight:700">Выберите компанию</h3>
+      <button class="btn-sm" onclick="document.getElementById('co-select-overlay').classList.remove('open')">✕</button>
+    </div>
+    <div id="co-list"></div>
+    <button class="btn-sm btn-green" style="width:100%;margin-top:10px;padding:10px" onclick="openAddCompany()">+ Добавить компанию</button>
+  </div>
+</div>
+
+<!-- ADD COMPANY MODAL -->
+<div class="modal-overlay" id="modal-add-company">
+  <div class="modal">
+    <h3>Новая компания</h3>
+    <div class="form-row">
+      <div><div class="form-lbl">Название компании</div><input type="text" id="nc-name" placeholder="ООО Ромашка"></div>
+      <div><div class="form-lbl">Отрасль</div>
+        <select id="nc-industry">
+          <option value="services">🏢 Услуги</option>
+          <option value="retail">🛒 Розница</option>
+          <option value="wholesale">📦 Оптовая торговля</option>
+          <option value="production">🏭 Производство</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm" onclick="closeModal('modal-add-company')">Отмена</button>
+      <button class="btn-sm btn-green" onclick="addCompany()">Создать</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a class="logo" href="#">
+    <div class="logo-ico"><svg width="16" height="16" viewBox="0 0 18 18"><rect x="2" y="9" width="3" height="7" rx="1" fill="white"/><rect x="7.5" y="5" width="3" height="11" rx="1" fill="white"/><rect x="13" y="2" width="3" height="14" rx="1" fill="white"/></svg></div>
+    <span class="logo-txt">Hisob<span>chi</span>.uz</span>
+  </a>
+  <div class="tb-center">
+    <div class="co-switcher">
+      <button class="co-btn" id="co-current-btn" onclick="openCoSelect()">🏢 <span id="co-current-name">Компания</span></button>
+    </div>
+    <label for="file-upload" class="btn-sm btn-green-o" style="cursor:pointer" id="import-lbl">📥 Импорт Excel</label>
+    <input type="file" id="file-upload" accept=".csv,.xlsx,.xls" style="display:none">
+    <button class="btn-sm" onclick="showManualAddForm()">➕ <span data-key="add_op">Добавить операцию</span></button>
+  </div>
+  <div class="tb-right">
+    <button class="theme-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Тема">🌙</button>
+    <button class="lang-btn active" onclick="setLang('ru',this)">RU</button>
+    <button class="lang-btn" onclick="setLang('uz',this)">UZ</button>
+    <button class="lang-btn" onclick="setLang('en',this)">EN</button>
+    <button class="avatar-btn" id="avatar-btn" onclick="openCabinet()">АА</button>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="fbar">
+  <label data-key="period">Период:</label>
+  <select id="f-month">
+    <option value="">— Месяц —</option>
+    <option value="01">Январь</option><option value="02">Февраль</option><option value="03">Март</option>
+    <option value="04">Апрель</option><option value="05">Май</option><option value="06" selected>Июнь</option>
+    <option value="07">Июль</option><option value="08">Август</option><option value="09">Сентябрь</option>
+    <option value="10">Октябрь</option><option value="11">Ноябрь</option><option value="12">Декабрь</option>
+  </select>
+  <select id="f-year">
+    <option value="2024">2024</option><option value="2025" selected>2025</option><option value="2026">2026</option>
+  </select>
+  <button class="btn-sm btn-green" onclick="applyFilter()" data-key="apply">Применить</button>
+  <button class="btn-sm" onclick="clearFilter()" data-key="reset">Сбросить</button>
+  <span style="margin-left:8px;font-size:11px;color:var(--text2)" id="filter-display">Июнь 2025</span>
+</div>
+
+<div class="layout">
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-sec">
+    <div class="sb-lbl" data-key="main">ОСНОВНЫЕ</div>
+    <div class="sb-item active" onclick="nav('dashboard',this)"><div class="sb-dot" style="background:#1D9E75"></div><span data-key="dashboard">📊 Дашборд</span></div>
+    <div class="sb-item" onclick="nav('operations',this)"><div class="sb-dot" style="background:#378ADD"></div><span data-key="operations">📋 Операции</span></div>
+    <div class="sb-item" onclick="nav('pnl',this)"><div class="sb-dot" style="background:#7F77DD"></div><span data-key="pnl">📈 P&L (Прибыль и убытки)</span></div>
+    <div class="sb-item" onclick="nav('cashflow',this)"><div class="sb-dot" style="background:#378ADD"></div><span data-key="cashflow">💵 Cash Flow (Пул оқими)</span></div>
+    <div class="sb-item" onclick="nav('balance',this)"><div class="sb-dot" style="background:#D85A30"></div><span data-key="balance">⚖️ Баланс</span></div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl" data-key="aux">ВСПОМОГАТЕЛЬНЫЕ</div>
+    <div class="sb-item" onclick="nav('salary',this)"><div class="sb-dot" style="background:#639922"></div><span data-key="salary">💼 Зарплата</span></div>
+    <div class="sb-item" onclick="nav('receivables',this)"><div class="sb-dot" style="background:#BA7517"></div><span data-key="receivables">📈 Дебиторка</span></div>
+    <div class="sb-item" onclick="nav('payables',this)"><div class="sb-dot" style="background:#E24B4A"></div><span data-key="payables">📉 Кредиторка</span></div>
+    <div class="sb-item" onclick="nav('loans_out',this)"><div class="sb-dot" style="background:#D4537E"></div><span data-key="loans_out">🔼 Займы выданные</span></div>
+    <div class="sb-item" onclick="nav('loans_in',this)"><div class="sb-dot" style="background:#534AB7"></div><span data-key="loans_in">🔽 Займы полученные</span></div>
+    <div class="sb-item" onclick="nav('taxes',this)"><div class="sb-dot" style="background:#888780"></div><span data-key="taxes">🧾 Налоги</span></div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl" data-key="ref">СПРАВОЧНИКИ</div>
+    <div class="sb-item" onclick="nav('directory',this)"><div class="sb-dot" style="background:#E28C47"></div><span data-key="directory">📁 Контрагенты</span></div>
+    <div class="sb-item" onclick="nav('currency',this)"><div class="sb-dot" style="background:#D4A01C"></div><span data-key="currency">💱 Курсы валют</span></div>
+  </div>
+  <div class="sb-sec" id="sb-admin-sec" style="display:none">
+    <div class="sb-lbl">АДМИНИСТРАТОР</div>
+    <div class="sb-item" onclick="nav('admin',this)"><div class="sb-dot" style="background:#E24B4A"></div><span>🛡️ Панель админа</span></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- ══════════════════════════════════════════════════
+     ДАШБОРД
+══════════════════════════════════════════════════ -->
+<div class="page active" id="page-dashboard">
+  <div class="pg-title" data-key="dash_title">Дашборд</div>
+  <div class="pg-sub" id="dash-sub">Июнь 2025 — все показатели</div>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-lbl" data-key="revenue">Выручка</div><div class="kpi-val G" id="d-rev">0</div><div class="kpi-delta" id="d-rev-d">—</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="expenses">Расходы</div><div class="kpi-val" id="d-exp">0</div><div class="kpi-delta" id="d-exp-d">—</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="profit">Прибыль</div><div class="kpi-val G" id="d-prf">0</div><div class="kpi-delta" id="d-prf-d">—</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="margin">Маржа</div><div class="kpi-val" id="d-mgn">0%</div><div class="kpi-delta">—</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="receivables">Дебиторка</div><div class="kpi-val A" id="d-deb">0</div><div class="kpi-delta" style="color:var(--text3)" id="d-deb-cnt">0 контрагентов</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="payables">Кредиторка</div><div class="kpi-val R" id="d-kred">0</div><div class="kpi-delta" style="color:var(--text3)" id="d-kred-cnt">0 поставщиков</div></div>
+  </div>
+  <div class="two-col">
+    <div class="card"><div class="card-title" data-key="exp_struct">Структура расходов</div><div class="chart-h200"><canvas id="ch-exp-donut"></canvas></div></div>
+    <div class="card"><div class="card-title" data-key="rev_struct">Выручка по статьям</div><div class="chart-h200"><canvas id="ch-rev-donut"></canvas></div></div>
+  </div>
+  <div class="card"><div class="card-title" data-key="monthly_dyn">Динамика по месяцам</div><div class="chart-h240"><canvas id="ch-trend"></canvas></div></div>
+  <div class="two-col">
+    <div class="card"><div class="card-title" data-key="cashflow_title">Cash Flow — итог месяца</div><div class="chart-h180"><canvas id="ch-cf-bar"></canvas></div></div>
+    <div class="card"><div class="card-title" data-key="top_exp">Топ расходов</div><div id="top-exp-list" style="margin-top:4px"></div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     ОПЕРАЦИИ
+══════════════════════════════════════════════════ -->
+<div class="page" id="page-operations">
+  <div class="pg-title" data-key="ops_title">Журнал операций</div>
+  <div class="pg-sub" data-key="ops_sub">Все транзакции из импорта и ручного ввода</div>
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+    <select id="ops-type" onchange="renderOps()" style="padding:5px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px">
+      <option value="ALL" data-key="all">Все типы</option>
+      <option value="PNL">P&L</option><option value="CF">Cash Flow</option><option value="BAL">Баланс</option>
+    </select>
+    <select id="ops-cat" onchange="renderOps()" style="padding:5px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px">
+      <option value="ALL" data-key="all_cat">Все статьи</option>
+    </select>
+    <button class="btn-sm" onclick="resetOpsFilters()">Сбросить</button>
+    <span style="margin-left:auto;font-size:11px;color:var(--text2)" id="ops-count">0 записей</span>
+  </div>
+  <div class="tbl-wrap">
+    <table class="tbl"><thead><tr>
+      <th data-key="date">Дата</th><th data-key="description">Описание</th>
+      <th data-key="income">Приход</th><th data-key="expense">Расход</th>
+      <th>Валюта</th><th data-key="uzs">Сумма (UZS)</th>
+      <th data-key="category">Статья</th><th data-key="report_type">Тип отчёта</th>
+      <th data-key="contractor">Контрагент</th>
+    </tr></thead><tbody id="ops-body"></tbody></table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     P&L
+══════════════════════════════════════════════════ -->
+<div class="page" id="page-pnl">
+  <div class="pg-title" data-key="pnl_title">P&L — Отчёт о прибылях и убытках</div>
+  <div class="pg-sub" id="pnl-sub">Июнь 2025</div>
+
+  <!-- Шаблоны по отраслям -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title" data-key="choose_industry">Выберите отрасль для шаблона</div>
+    <div class="ind-tabs">
+      <button class="ind-tab active" onclick="setIndustry('services',this,'pnl')" data-key="services">🏢 Услуги</button>
+      <button class="ind-tab" onclick="setIndustry('retail',this,'pnl')" data-key="retail">🛒 Розница</button>
+      <button class="ind-tab" onclick="setIndustry('wholesale',this,'pnl')" data-key="wholesale">📦 Оптовая торговля</button>
+      <button class="ind-tab" onclick="setIndustry('production',this,'pnl')" data-key="production">🏭 Производство</button>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="card">
+        <div class="card-title">
+          <span id="pnl-tpl-name">P&L — Услуги</span>
+          <button class="btn-sm btn-green-o" onclick="exportReport('pnl')" data-key="export">⬇ Экспорт</button>
+        </div>
+        <table class="tbl" id="pnl-table">
+          <thead><tr><th data-key="item">Статья</th><th data-key="month">Месяц</th><th>YTD</th><th>%</th></tr></thead>
+          <tbody id="pnl-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="card"><div class="card-title" data-key="pnl_chart">График P&L</div><div class="chart-h240"><canvas id="ch-pnl"></canvas></div></div>
+      <div class="card">
+        <div class="card-title" data-key="mapping_title">Маппинг статей из Excel</div>
+        <div id="pnl-mapping" style="font-size:11px;color:var(--text2)">
+          <p>После импорта Excel статьи автоматически распределятся по отраслевому шаблону.</p>
+          <div id="mapping-list" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     CASH FLOW
+══════════════════════════════════════════════════ -->
+<div class="page" id="page-cashflow">
+  <div class="pg-title" data-key="cf_title">Cash Flow — Движение денежных средств</div>
+  <div class="pg-sub" id="cf-sub">Июнь 2025</div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title" data-key="choose_industry">Выберите отрасль</div>
+    <div class="ind-tabs">
+      <button class="ind-tab active" onclick="setIndustry('services',this,'cf')" data-key="services">🏢 Услуги</button>
+      <button class="ind-tab" onclick="setIndustry('retail',this,'cf')" data-key="retail">🛒 Розница</button>
+      <button class="ind-tab" onclick="setIndustry('wholesale',this,'cf')" data-key="wholesale">📦 Оптовая торговля</button>
+      <button class="ind-tab" onclick="setIndustry('production',this,'cf')" data-key="production">🏭 Производство</button>
+    </div>
+  </div>
+
+  <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="kpi"><div class="kpi-lbl" data-key="open_bal">Остаток начало</div><div class="kpi-val" id="cf-open">0</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="net_flow">Чистый поток</div><div class="kpi-val G" id="cf-net">0</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="close_bal">Остаток конец</div><div class="kpi-val G" id="cf-close">0</div></div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">
+        <span id="cf-tpl-name">Cash Flow — Услуги</span>
+        <button class="btn-sm btn-green-o" onclick="exportReport('cf')" data-key="export">⬇ Экспорт</button>
+      </div>
+      <table class="tbl">
+        <thead><tr><th data-key="section">Раздел</th><th data-key="income">Поступления</th><th data-key="expense_col">Выплаты</th><th data-key="net">Нетто</th></tr></thead>
+        <tbody id="cf-body"></tbody>
+      </table>
+    </div>
+    <div class="card"><div class="card-title" data-key="cf_chart">Структура Cash Flow</div><div class="chart-h240"><canvas id="ch-cf"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     БАЛАНС
+══════════════════════════════════════════════════ -->
+<div class="page" id="page-balance">
+  <div class="pg-title" data-key="bal_title">Баланс</div>
+  <div class="pg-sub" id="bal-sub">На 30 июня 2025</div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title" data-key="choose_industry">Выберите отрасль</div>
+    <div class="ind-tabs">
+      <button class="ind-tab active" onclick="setIndustry('services',this,'bal')" data-key="services">🏢 Услуги</button>
+      <button class="ind-tab" onclick="setIndustry('retail',this,'bal')" data-key="retail">🛒 Розница</button>
+      <button class="ind-tab" onclick="setIndustry('wholesale',this,'bal')" data-key="wholesale">📦 Оптовая торговля</button>
+      <button class="ind-tab" onclick="setIndustry('production',this,'bal')" data-key="production">🏭 Производство</button>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">
+        <span data-key="assets">Активы</span>
+        <button class="btn-sm btn-green-o" onclick="exportReport('bal')" data-key="export">⬇ Экспорт</button>
+      </div>
+      <table class="tbl"><thead><tr><th data-key="item">Статья</th><th data-key="sum">Сумма</th></tr></thead><tbody id="bal-assets-body"></tbody></table>
+    </div>
+    <div class="card">
+      <div class="card-title" data-key="liabilities">Пассивы</div>
+      <table class="tbl"><thead><tr><th data-key="item">Статья</th><th data-key="sum">Сумма</th></tr></thead><tbody id="bal-liab-body"></tbody></table>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="card"><div class="card-title" data-key="assets_chart">Структура активов</div><div class="chart-h180"><canvas id="ch-assets"></canvas></div></div>
+    <div class="card"><div class="card-title" data-key="liab_chart">Структура пассивов</div><div class="chart-h180"><canvas id="ch-liab"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     ЗАРПЛАТА
+══════════════════════════════════════════════════ -->
+<div class="page" id="page-salary">
+  <div class="pg-title" data-key="salary_title">Зарплатная ведомость</div>
+  <div class="pg-sub" id="sal-sub">Выплаты сотрудникам</div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi"><div class="kpi-lbl" data-key="total_sal">Всего зарплат</div><div class="kpi-val G" id="sal-total">0</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="emp_count">Сотрудников</div><div class="kpi-val" id="sal-cnt">0</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="paid_sal">Выплачено</div><div class="kpi-val G" id="sal-paid">0</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="debt_sal">Долг</div><div class="kpi-val R" id="sal-debt">0</div></div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title" data-key="emp_list">Список сотрудников <button class="btn-sm btn-green-o" onclick="openSalaryAdd()" style="font-size:10px">+ Добавить</button></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th data-key="name">Сотрудник</th><th data-key="dept">Отдел</th><th data-key="salary">Оклад</th><th data-key="bonus">Бонус</th><th data-key="status">Статус</th></tr></thead><tbody id="sal-body"></tbody></table></div>
+    </div>
+    <div class="card"><div class="card-title" data-key="sal_chart">По отделам</div><div class="chart-h240"><canvas id="ch-sal"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     ДЕБИТОРКА
+══════════════════════════════════════════════════ -->
+<div class="page" id="page-receivables">
+  <div class="pg-title" data-key="deb_title">Дебиторская задолженность</div>
+  <div class="pg-sub" data-key="deb_sub">Контрагенты, которые должны вам</div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi"><div class="kpi-lbl" data-key="total_deb">Всего дебиторка</div><div class="kpi-val A" id="deb-total">0</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="overdue">Просрочено</div><div class="kpi-val R" id="deb-overdue">0</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="count">Контрагентов</div><div class="kpi-val" id="deb-cnt">0</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="avg_days">Ср. дней</div><div class="kpi-val" id="deb-days">0</div></div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title" data-key="deb_list">Список должников <button class="btn-sm btn-green-o" onclick="openDebAdd()" style="font-size:10px">+ Добавить</button></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th data-key="company">Компания</th><th data-key="amount">Сумма</th><th data-key="due_date">Срок</th><th data-key="days">Дней</th><th data-key="status">Статус</th></tr></thead><tbody id="deb-body"></tbody></table></div>
+    </div>
+    <div class="card"><div class="card-title" data-key="deb_chart">Дебиторка по контрагентам</div><div class="chart-h240"><canvas id="ch-deb"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     КРЕДИТОРКА
+══════════════════════════════════════════════════ -->
+<div class="page" id="page-payables">
+  <div class="pg-title" data-key="kred_title">Кредиторская задолженность</div>
+  <div class="pg-sub" data-key="kred_sub">Контрагенты, которым вы должны</div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi"><div class="kpi-lbl" data-key="total_kred">Всего кредиторка</div><div class="kpi-val R" id="kred-total">0</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="overdue">Просрочено</div><div class="kpi-val R" id="kred-overdue">0</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="suppliers">Поставщиков</div><div class="kpi-val" id="kred-cnt">0</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="next_pay">Следующий платёж</div><div class="kpi-val A" id="kred-next">—</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title" data-key="kred_list">Список кредиторов <button class="btn-sm btn-green-o" onclick="openKredAdd()" style="font-size:10px">+ Добавить</button></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th data-key="supplier">Поставщик</th><th data-key="amount">Сумма</th><th data-key="due_date">Срок</th><th data-key="priority">Приоритет</th><th data-key="status">Статус</th></tr></thead><tbody id="kred-body"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     ЗАЙМЫ ВЫДАННЫЕ
+══════════════════════════════════════════════════ -->
+<div class="page" id="page-loans_out">
+  <div class="pg-title" data-key="lout_title">Займы выданные</div>
+  <div class="pg-sub" data-key="lout_sub">Деньги, выданные другим</div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi"><div class="kpi-lbl" data-key="total_issued">Всего выдано</div><div class="kpi-val G">18.5M</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="returned">Возвращено</div><div class="kpi-val G">12.1M</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="outstanding">Остаток</div><div class="kpi-val A">6.4M</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="interest">% доход</div><div class="kpi-val G">540K</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title" data-key="loans_list">Список займов <button class="btn-sm btn-green-o" onclick="openLoanOutAdd()" style="font-size:10px">+ Добавить</button></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th data-key="borrower">Заёмщик</th><th data-key="total">Сумма</th><th data-key="returned">Возвращено</th><th data-key="balance">Остаток</th><th>%</th><th data-key="due_date">Срок</th><th data-key="status">Статус</th></tr></thead><tbody id="lout-body"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     ЗАЙМЫ ПОЛУЧЕННЫЕ
+══════════════════════════════════════════════════ -->
+<div class="page" id="page-loans_in">
+  <div class="pg-title" data-key="lin_title">Займы полученные</div>
+  <div class="pg-sub" data-key="lin_sub">Банковские кредиты и займы</div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi"><div class="kpi-lbl" data-key="total_debt">Всего долг</div><div class="kpi-val R">42.0M</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="repaid">Погашено</div><div class="kpi-val G">28.5M</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="remaining">Остаток</div><div class="kpi-val R">13.5M</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="monthly_pay">Ежемесячно</div><div class="kpi-val">1.8M</div></div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title" data-key="loans_in_list">Кредиты <button class="btn-sm btn-green-o" onclick="openLoanInAdd()" style="font-size:10px">+ Добавить</button></div>
+      <table class="tbl"><thead><tr><th data-key="lender">Кредитор</th><th data-key="total">Всего</th><th data-key="repaid">Погашено</th><th>%</th><th data-key="monthly">Ежемес.</th><th data-key="end_date">Срок</th></tr></thead><tbody id="lin-body"></tbody></table>
+    </div>
+    <div class="card"><div class="card-title" data-key="loans_chart">График погашения</div><div class="chart-h240"><canvas id="ch-loans"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     НАЛОГИ
+══════════════════════════════════════════════════ -->
+<div class="page" id="page-taxes">
+  <div class="pg-title" data-key="tax_title">Налоговый отчёт</div>
+  <div class="pg-sub" data-key="tax_sub">Налоговые обязательства и выплаты</div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi"><div class="kpi-lbl" data-key="total_tax">Всего налогов</div><div class="kpi-val">8.9M</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="paid_tax">Уплачено</div><div class="kpi-val G">6.2M</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="debt_tax">Задолженность</div><div class="kpi-val R">2.7M</div></div>
+    <div class="kpi"><div class="kpi-lbl" data-key="next_deadline">Следующий срок</div><div class="kpi-val">15 июл</div></div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title" data-key="tax_list">Виды налогов</div>
+      <table class="tbl"><thead><tr><th data-key="tax_type">Налог</th><th data-key="period">Период</th><th data-key="accrued">Начислено</th><th data-key="paid">Уплачено</th><th data-key="status">Статус</th></tr></thead>
+        <tbody>
+          <tr><td>НДС (12%)</td><td>Июнь 2025</td><td>2 100 000</td><td class="ap">2 100 000</td><td><span class="badge bg">Уплачено</span></td></tr>
+          <tr><td>Налог на прибыль (15%)</td><td>Июнь 2025</td><td>1 800 000</td><td class="ap">1 800 000</td><td><span class="badge bg">Уплачено</span></td></tr>
+          <tr><td>НДФЛ (12%)</td><td>Июнь 2025</td><td>1 600 000</td><td class="A">800 000</td><td><span class="badge ba">Частично</span></td></tr>
+          <tr><td>Соц. страх. (25%)</td><td>Июнь 2025</td><td>2 200 000</td><td class="R">—</td><td><span class="badge br">Не уплачено</span></td></tr>
+          <tr><td>Налог на имущество</td><td>Q2 2025</td><td>1 200 000</td><td class="ap">1 500 000</td><td><span class="badge bg">Уплачено</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card"><div class="card-title" data-key="tax_chart">Статус оплаты</div><div class="chart-h240"><canvas id="ch-tax"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     СПРАВОЧНИК
+══════════════════════════════════════════════════ -->
+<div class="page" id="page-directory">
+  <div class="pg-title" data-key="dir_title">Справочник контрагентов</div>
+  <div class="pg-sub" data-key="dir_sub">Клиенты, поставщики, счета</div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title" data-key="add_contractor">Добавить контрагента / счёт</div>
+      <div class="form-row">
+        <div><div class="form-lbl" data-key="name">Наименование</div><input type="text" id="dir-name" placeholder="ООО Ромашка"></div>
+        <div><div class="form-lbl" data-key="type">Тип</div>
+          <select id="dir-type">
+            <option value="client" data-key="client">Клиент</option>
+            <option value="supplier" data-key="supplier">Поставщик</option>
+            <option value="bank" data-key="bank">Счёт в банке</option>
+            <option value="cash" data-key="cash">Касса</option>
+          </select>
+        </div>
+        <button class="btn-sm btn-green" onclick="addDir()">Сохранить</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title" data-key="dir_list">Список</div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th data-key="name">Наименование</th><th data-key="type">Тип</th><th data-key="balance">Баланс (UZS)</th></tr></thead><tbody id="dir-body"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     КУРСЫ ВАЛЮТ
+══════════════════════════════════════════════════ -->
+<div class="page" id="page-currency">
+  <div class="pg-title" data-key="curr_title">Курсы валют</div>
+  <div class="pg-sub" data-key="curr_sub">Базовая валюта: UZS</div>
+  <div class="card" style="max-width:420px">
+    <div class="card-title" data-key="curr_rates">Текущие курсы</div>
+    <div id="rates-list" style="display:grid;gap:10px"></div>
+    <button class="btn-sm btn-green" onclick="saveRates()" style="margin-top:12px;width:100%" data-key="save">Сохранить</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     ADMIN PANEL
+══════════════════════════════════════════════════ -->
+<div class="page" id="page-admin">
+  <div class="pg-title">🛡️ Панель администратора</div>
+  <div class="pg-sub">Управление пользователями, подписками и данными</div>
+
+  <!-- Stats -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px" id="admin-stats-grid">
+    <div class="admin-stat"><div class="admin-stat-val" id="adm-users-cnt">0</div><div class="admin-stat-lbl">Пользователей</div></div>
+    <div class="admin-stat"><div class="admin-stat-val" id="adm-co-cnt">0</div><div class="admin-stat-lbl">Компаний</div></div>
+    <div class="admin-stat"><div class="admin-stat-val" id="adm-pro-cnt">0</div><div class="admin-stat-lbl">Pro подписок</div></div>
+    <div class="admin-stat"><div class="admin-stat-val" id="adm-biz-cnt">0</div><div class="admin-stat-lbl">Business подписок</div></div>
+    <div class="admin-stat"><div class="admin-stat-val" id="adm-tx-cnt">0</div><div class="admin-stat-lbl">Транзакций</div></div>
+  </div>
+
+  <div class="admin-grid">
+    <!-- Users table -->
+    <div class="admin-section" style="grid-column: 1/-1">
+      <h4>Пользователи и подписки
+        <button class="btn-sm btn-green-o" onclick="refreshAdminPage()" style="font-size:10px">🔄 Обновить</button>
+      </h4>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr>
+            <th>Пользователь</th><th>Email</th><th>Компании</th><th>Тариф</th>
+            <th>Действует до</th><th>Транзакций</th><th>Действия</th>
+          </tr></thead>
+          <tbody id="adm-users-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- All companies -->
+  <div class="admin-section" style="margin-bottom:14px">
+    <h4>Все компании в системе</h4>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Компания</th><th>Владелец</th><th>Отрасль</th><th>Транзакций</th><th>Создана</th><th>Действия</th></tr></thead>
+        <tbody id="adm-companies-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- System settings -->
+  <div class="admin-grid">
+    <div class="admin-section">
+      <h4>Настройки тарифов</h4>
+      <div style="display:grid;gap:10px">
+        <div><div class="form-lbl">Free — макс. транзакций</div><input class="editable-input" id="adm-free-limit" type="number" value="100"></div>
+        <div><div class="form-lbl">Free — макс. компаний</div><input class="editable-input" id="adm-free-co" type="number" value="1"></div>
+        <div><div class="form-lbl">Pro — цена ($/мес)</div><input class="editable-input" id="adm-pro-price" type="number" value="29"></div>
+        <div><div class="form-lbl">Business — цена ($/мес)</div><input class="editable-input" id="adm-biz-price" type="number" value="79"></div>
+        <button class="btn-sm btn-green" onclick="saveAdminSettings()">Сохранить настройки</button>
+      </div>
+    </div>
+    <div class="admin-section">
+      <h4>Изменить подписку пользователя</h4>
+      <div style="display:grid;gap:10px">
+        <div><div class="form-lbl">Email пользователя</div><input class="editable-input" type="email" id="adm-target-email" placeholder="user@email.com"></div>
+        <div><div class="form-lbl">Новый тариф</div>
+          <select class="editable-input" id="adm-new-plan">
+            <option value="free">Free</option>
+            <option value="pro">Pro</option>
+            <option value="business">Business</option>
+          </select>
+        </div>
+        <div><div class="form-lbl">Действует до</div><input class="editable-input" type="date" id="adm-plan-expires"></div>
+        <button class="btn-sm btn-green" onclick="adminChangePlan()">Применить</button>
+      </div>
+    </div>
+    <div class="admin-section">
+      <h4>Опасная зона</h4>
+      <div style="display:grid;gap:8px">
+        <div><div class="form-lbl">Email пользователя</div><input class="editable-input" type="email" id="adm-del-email" placeholder="user@email.com"></div>
+        <button class="btn-sm" style="background:#FCEBEB;color:#a32d2d;border-color:#E24B4A" onclick="adminDeleteUser()">🗑️ Удалить пользователя</button>
+        <button class="btn-sm" style="background:#FAEEDA;color:#633806;border-color:#BA7517;margin-top:4px" onclick="adminResetData()">⚠️ Сбросить данные пользователя</button>
+      </div>
+    </div>
+    <!-- Payment requests -->
+    <div class="admin-section" style="grid-column:1/-1;margin-top:14px">
+      <h4>📋 Запросы на активацию подписки
+        <button class="btn-sm btn-green-o" onclick="loadPaymentRequests()" style="font-size:10px">🔄 Обновить</button>
+      </h4>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>Email</th><th>Тариф</th><th>Сумма</th><th>Дата</th><th>Статус</th><th>Действие</th></tr></thead>
+          <tbody id="adm-payments-body"><tr><td colspan="6" style="text-align:center;color:var(--text3)">Нажмите «Обновить»</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- ══════════════════════════════════════════════════
+     ЛИЧНЫЙ КАБИНЕТ
+══════════════════════════════════════════════════ -->
+<div class="cabinet-overlay" id="cabinet-overlay" onclick="closeCabinet(event)">
+  <div class="cabinet-panel" onclick="event.stopPropagation()">
+    <div class="cab-header">
+      <span style="font-size:15px;font-weight:700" data-key="my_account">Мой кабинет</span>
+      <button class="btn-sm" onclick="closeCabinet()">✕</button>
+    </div>
+    <div class="cab-avatar" id="cab-avatar-text">АА</div>
+    <div class="cab-name" id="cab-name-display">—</div>
+    <div class="cab-email" id="cab-email-display">—</div>
+
+    <div class="plan-card" id="cab-plan-card">
+      <div class="plan-badge" id="cab-plan-badge">FREE</div>
+      <h4 id="cab-plan-name">Текущий план: Free</h4>
+      <p id="cab-plan-expires">Действует до: —</p>
+      <p style="margin-top:6px;font-size:11px;opacity:.75" id="cab-plan-features">✓ 1 компания  ✓ 100 операций</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val" id="cab-tx-cnt">0</div><div class="stat-lbl">Транзакций</div></div>
+      <div class="stat-card"><div class="stat-val" id="cab-dir-cnt">0</div><div class="stat-lbl">Контрагентов</div></div>
+      <div class="stat-card"><div class="stat-val" id="cab-co-cnt">0</div><div class="stat-lbl">Компаний</div></div>
+      <div class="stat-card"><div class="stat-val" id="cab-lang-val">RU</div><div class="stat-lbl">Язык</div></div>
+    </div>
+
+    <!-- Edit profile inline -->
+    <div class="cab-section" id="cab-profile-edit" style="display:none">
+      <h5>РЕДАКТИРОВАТЬ ПРОФИЛЬ</h5>
+      <div style="display:grid;gap:8px">
+        <div><div class="form-lbl">Имя</div><input class="editable-input" id="cab-edit-name" type="text" placeholder="Ваше имя"></div>
+        <div><div class="form-lbl">Текущий пароль</div><input class="editable-input" id="cab-edit-oldpass" type="password" placeholder="••••••••"></div>
+        <div><div class="form-lbl">Новый пароль</div><input class="editable-input" id="cab-edit-newpass" type="password" placeholder="••••••••"></div>
+        <button class="btn-sm btn-green" onclick="saveProfile()">Сохранить</button>
+        <button class="btn-sm" onclick="document.getElementById('cab-profile-edit').style.display='none'">Отмена</button>
+      </div>
+    </div>
+
+    <div class="cab-section">
+      <h5>ТАРИФЫ</h5>
+      <!-- FREE -->
+      <div class="tariff-card" data-plan="free" style="margin-bottom:8px;text-align:left;padding:12px 14px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="tariff-name">Free</div>
+            <div class="tariff-features" style="margin-top:3px">1 компания · 100 операций · Только P&L</div>
+          </div>
+          <div style="text-align:right">
+            <div class="tariff-price" style="font-size:13px">0</div>
+            <div class="tariff-per">в месяц</div>
+          </div>
+        </div>
+      </div>
+      <!-- PRO -->
+      <div class="tariff-card" data-plan="pro" style="margin-bottom:8px;border-color:var(--green);text-align:left;padding:12px 14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="tariff-name">Pro</div>
+              <span style="background:var(--green);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px">ПОПУЛЯРНЫЙ</span>
+            </div>
+            <div class="tariff-features" style="margin-top:3px">3 компании · Все отчёты · Импорт Excel</div>
+          </div>
+          <div style="text-align:right">
+            <div class="tariff-price">349 000</div>
+            <div class="tariff-per">сум/месяц</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <button class="pay-btn pay-payme" onclick="openPayment('pro','payme')">
+            <img src="https://cdn.payme.uz/theme/images/logo_payme_mini.svg" onerror="this.style.display='none'" style="height:14px;vertical-align:middle;margin-right:4px">Payme
+          </button>
+          <button class="pay-btn pay-click" onclick="openPayment('pro','click')">
+            <span style="font-weight:800;letter-spacing:-0.5px">CLICK</span>
+          </button>
+        </div>
+      </div>
+      <!-- BUSINESS -->
+      <div class="tariff-card" data-plan="business" style="text-align:left;padding:12px 14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div>
+            <div class="tariff-name">Business</div>
+            <div class="tariff-features" style="margin-top:3px">10 компаний · API · Приоритетная поддержка</div>
+          </div>
+          <div style="text-align:right">
+            <div class="tariff-price">890 000</div>
+            <div class="tariff-per">сум/месяц</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <button class="pay-btn pay-payme" onclick="openPayment('business','payme')">
+            <img src="https://cdn.payme.uz/theme/images/logo_payme_mini.svg" onerror="this.style.display='none'" style="height:14px;vertical-align:middle;margin-right:4px">Payme
+          </button>
+          <button class="pay-btn pay-click" onclick="openPayment('business','click')">
+            <span style="font-weight:800;letter-spacing:-0.5px">CLICK</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cab-section">
+      <h5>НАСТРОЙКИ</h5>
+      <div class="cab-item" onclick="toggleProfileEdit()"><span>👤</span><span>Редактировать профиль</span></div>
+      <div class="cab-item" onclick="toggleTheme();closeCabinet()"><span id="theme-icon-cab">🌙</span><span id="theme-label-cab">Тёмная тема</span></div>
+      <div class="cab-item" onclick="doLogout()"><span>🚪</span><span>Выйти из аккаунта</span></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     МОДАЛ ОПЛАТЫ
+══════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-payment">
+  <div class="modal" style="max-width:440px">
+    <h3 id="pay-modal-title">Оплата подписки</h3>
+    <div id="pay-modal-content"></div>
+    <div class="modal-footer">
+      <button class="btn-sm" onclick="closeModal('modal-payment')">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     МОДАЛ ДОБАВИТЬ ОПЕРАЦИЮ
+══════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-op">
+  <div class="modal">
+    <h3 data-key="add_op">Добавить операцию</h3>
+    <div class="form-row">
+      <div class="form-2">
+        <div><div class="form-lbl" data-key="date">Дата</div><input type="date" id="m-date"></div>
+        <div><div class="form-lbl" data-key="currency">Валюта</div>
+          <select id="m-cur"><option>UZS</option><option>USD</option><option>EUR</option><option>RUB</option></select>
+        </div>
+      </div>
+      <div><div class="form-lbl" data-key="description">Описание</div><input type="text" id="m-desc" placeholder="Продажа товара, аренда..."></div>
+      <div class="form-2">
+        <div><div class="form-lbl" data-key="income">Приход</div><input type="number" id="m-inc" placeholder="0"></div>
+        <div><div class="form-lbl" data-key="expense_col">Расход</div><input type="number" id="m-exp" placeholder="0"></div>
+      </div>
+      <div><div class="form-lbl" data-key="category">Статья</div><input type="text" id="m-cat" placeholder="Выручка / Аренда / Зарплата..."></div>
+      <div><div class="form-lbl" data-key="report_type">Тип отчёта</div>
+        <select id="m-type"><option value="PNL">P&L</option><option value="CF">Cash Flow</option><option value="BAL">Баланс</option></select>
+      </div>
+      <div><div class="form-lbl" data-key="contractor">Контрагент</div><select id="m-contractor"></select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm" onclick="closeModal('modal-op')" data-key="cancel">Отмена</button>
+      <button class="btn-sm btn-green" onclick="saveOp()" data-key="save">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<!-- УВЕДОМЛЕНИЕ -->
+<div class="notif" id="notif"></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ═══════════════════════════════════════════════
+// ДАННЫЕ
+// ═══════════════════════════════════════════════
+const S = {
+  lang: 'ru',
+  industry: { pnl:'services', cf:'services', bal:'services' },
+  filter: { month:'06', year:'2025' },
+  rates: { UZS:1, USD:12700, EUR:13800, RUB:140 },
+  transactions: [],
+  directory: [
+    {id:'d1',name:'ООО Ромашка',type:'client',balance:0},
+    {id:'d2',name:'ИП Иванов',type:'supplier',balance:0},
+    {id:'d3',name:'Основной счёт (UZS)',type:'bank',balance:10000000}
+  ],
+  salary: [
+    {name:'Алиев Жасур',dept:'Продажи',salary:3500000,bonus:450000,status:'paid'},
+    {name:'Каримова Дилноза',dept:'Логистика',salary:2800000,bonus:0,status:'paid'},
+    {name:'Тошматов Бобур',dept:'Продажи',salary:3200000,bonus:200000,status:'partial'},
+    {name:'Назарова Феруза',dept:'Бухгалтерия',salary:2500000,bonus:0,status:'unpaid'},
+    {name:'Холматов Санжар',dept:'Логистика',salary:2200000,bonus:150000,status:'paid'},
+  ],
+  receivables: [
+    {company:'Alfa Trade LLC',amount:8200000,due:'2025-06-15',days:-12,status:'overdue'},
+    {company:'Beta Logistics',amount:5600000,due:'2025-06-30',days:3,status:'soon'},
+    {company:'Gamma Service',amount:4100000,due:'2025-07-15',days:18,status:'ok'},
+    {company:'Delta Corp',amount:6200000,due:'2025-08-01',days:35,status:'ok'},
+  ],
+  payables: [
+    {company:'SupplyCo UZ',amount:3100000,due:'2025-06-10',priority:'high',status:'overdue'},
+    {company:'Optom Baza',amount:2400000,due:'2025-07-01',priority:'medium',status:'soon'},
+    {company:'Import LLC',amount:4200000,due:'2025-07-15',priority:'low',status:'ok'},
+    {company:'Tech Parts',amount:1900000,due:'2025-08-01',priority:'low',status:'ok'},
+  ],
+  loans_out: [
+    {name:'Рахимов Дилшод (сотр.)',total:2000000,returned:1500000,rate:'0%',due:'2025-09-01',status:'active'},
+    {name:'Partner LLC',total:4400000,returned:2200000,rate:'18%',due:'2025-08-01',status:'active'},
+    {name:'Холиков Жавлон',total:1000000,returned:300000,rate:'0%',due:'2025-06-15',status:'overdue'},
+  ],
+  loans_in: [
+    {lender:'Капиталбанк',total:20000000,repaid:13500000,rate:'22%',monthly:800000,end:'2027-01'},
+    {lender:'Халқ Банки',total:15000000,repaid:11000000,rate:'18%',monthly:650000,end:'2026-06'},
+    {lender:'Частный инвестор',total:7000000,repaid:4000000,rate:'24%',monthly:350000,end:'2025-12'},
+  ]
+};
+
+// INIT DEMO TRANSACTIONS
+S.transactions = [
+  {date:'2025-06-01',desc:'Продажа товара (Ромашка)',amount:25000000,currency:'UZS',amountUzs:25000000,category:'Выручка от продаж',type:'PNL',contractor:'d1'},
+  {date:'2025-06-03',desc:'Продажа услуг',amount:12000000,currency:'UZS',amountUzs:12000000,category:'Выручка от услуг',type:'PNL',contractor:'d1'},
+  {date:'2025-06-05',desc:'Аренда офиса',amount:-3500000,currency:'UZS',amountUzs:-3500000,category:'Аренда',type:'PNL',contractor:'d2'},
+  {date:'2025-06-08',desc:'Зарплата сотрудников',amount:-12200000,currency:'UZS',amountUzs:-12200000,category:'Зарплата',type:'PNL',contractor:'d2'},
+  {date:'2025-06-10',desc:'Оплата от клиента (USD)',amount:1000,currency:'USD',amountUzs:12700000,category:'Выручка от продаж',type:'CF',contractor:'d1'},
+  {date:'2025-06-12',desc:'Коммунальные услуги',amount:-800000,currency:'UZS',amountUzs:-800000,category:'Коммунальные',type:'PNL',contractor:'d2'},
+  {date:'2025-06-15',desc:'Маркетинг и реклама',amount:-2100000,currency:'UZS',amountUzs:-2100000,category:'Маркетинг',type:'PNL',contractor:'d2'},
+  {date:'2025-06-18',desc:'Продажа (3-й клиент)',amount:18000000,currency:'UZS',amountUzs:18000000,category:'Выручка от продаж',type:'PNL',contractor:'d1'},
+  {date:'2025-06-20',desc:'Транспортные расходы',amount:-1400000,currency:'UZS',amountUzs:-1400000,category:'Логистика',type:'CF',contractor:'d2'},
+  {date:'2025-06-25',desc:'Оплата поставщику',amount:-5600000,currency:'UZS',amountUzs:-5600000,category:'Себестоимость товара',type:'CF',contractor:'d2'},
+];
+
+// ═══════════════════════════════════════════════
+// ОТРАСЛЕВЫЕ ШАБЛОНЫ
+// ═══════════════════════════════════════════════
+const TEMPLATES = {
+  services: {
+    name: {ru:'Услуги', uz:'Xizmatlar', en:'Services'},
+    pnl: [
+      {key:'rev_services',label:{ru:'Выручка от услуг',uz:'Xizmatlardan daromad',en:'Service Revenue'},type:'rev',cat:'Выручка от услуг'},
+      {key:'rev_consulting',label:{ru:'Консалтинг',uz:'Konsalting',en:'Consulting'},type:'rev',cat:'Консалтинг'},
+      {key:'cogs',label:{ru:'Прямые затраты',uz:'To\'g\'ridan xarajat',en:'Direct Costs'},type:'exp',cat:'Себестоимость'},
+      {key:'gross',label:{ru:'ВАЛОВАЯ ПРИБЫЛЬ',uz:'YALPI FOYDA',en:'GROSS PROFIT'},type:'total'},
+      {key:'salary',label:{ru:'Зарплата',uz:'Ish haqi',en:'Payroll'},type:'exp',cat:'Зарплата'},
+      {key:'rent',label:{ru:'Аренда',uz:'Ijara',en:'Rent'},type:'exp',cat:'Аренда'},
+      {key:'marketing',label:{ru:'Маркетинг',uz:'Marketing',en:'Marketing'},type:'exp',cat:'Маркетинг'},
+      {key:'other_exp',label:{ru:'Прочие расходы',uz:'Boshqa xarajatlar',en:'Other Expenses'},type:'exp',cat:'Коммунальные'},
+      {key:'ebitda',label:{ru:'EBITDA',uz:'EBITDA',en:'EBITDA'},type:'total'},
+      {key:'tax',label:{ru:'Налоги',uz:'Soliqlar',en:'Taxes'},type:'exp',cat:'Налоги'},
+      {key:'net',label:{ru:'ЧИСТАЯ ПРИБЫЛЬ',uz:'SOF FOYDA',en:'NET PROFIT'},type:'total'},
+    ],
+    cf: [
+      {key:'ops_in',label:{ru:'Операционные поступления',uz:'Operatsion kirimlar',en:'Operating Inflows'},type:'in'},
+      {key:'ops_out',label:{ru:'Операционные выплаты',uz:'Operatsion chiqimlar',en:'Operating Outflows'},type:'out'},
+      {key:'ops_net',label:{ru:'Итого операционная',uz:'Jami operatsion',en:'Net Operating'},type:'total'},
+      {key:'inv_in',label:{ru:'Инвест. поступления',uz:'Investitsiya kirimlar',en:'Investing Inflows'},type:'in'},
+      {key:'inv_out',label:{ru:'Инвест. выплаты',uz:'Investitsiya chiqimlar',en:'Investing Outflows'},type:'out'},
+      {key:'inv_net',label:{ru:'Итого инвест.',uz:'Jami investitsiya',en:'Net Investing'},type:'total'},
+      {key:'fin_in',label:{ru:'Фин. поступления',uz:'Moliyaviy kirimlar',en:'Financing Inflows'},type:'in'},
+      {key:'fin_out',label:{ru:'Фин. выплаты',uz:'Moliyaviy chiqimlar',en:'Financing Outflows'},type:'out'},
+      {key:'fin_net',label:{ru:'Итого финансовая',uz:'Jami moliyaviy',en:'Net Financing'},type:'total'},
+    ],
+    bal_assets: [
+      {key:'cash',label:{ru:'Денежные средства',uz:'Pul mablag\'lari',en:'Cash'},val:58000000},
+      {key:'recv',label:{ru:'Дебиторская задолженность',uz:'Debitorlik',en:'Receivables'},val:24100000},
+      {key:'prepaid',label:{ru:'Авансы выданные',uz:'Berilgan avanslar',en:'Prepaid'},val:8400000},
+      {key:'fixed',label:{ru:'Основные средства',uz:'Asosiy vositalar',en:'Fixed Assets'},val:25600000},
+      {key:'intangible',label:{ru:'Нематериальные активы',uz:'Nomoddiy aktivlar',en:'Intangibles'},val:12000000},
+    ],
+    bal_liab: [
+      {key:'pay',label:{ru:'Кредиторская задолженность',uz:'Kreditorlik',en:'Payables'},val:11600000},
+      {key:'salary_p',label:{ru:'Задолженность по зарплате',uz:'Ish haqi qarzi',en:'Salary Payable'},val:7200000},
+      {key:'tax_p',label:{ru:'Налоговый долг',uz:'Soliq qarzi',en:'Tax Payable'},val:2700000},
+      {key:'loans',label:{ru:'Кредиты',uz:'Kreditlar',en:'Loans'},val:13500000},
+      {key:'equity',label:{ru:'Собственный капитал',uz:'Kapital',en:'Equity'},val:83100000},
+    ]
+  },
+  retail: {
+    name: {ru:'Розница', uz:'Chakana savdo', en:'Retail'},
+    pnl: [
+      {key:'rev_retail',label:{ru:'Выручка от розничных продаж',uz:'Chakana savdo daromadi',en:'Retail Revenue'},type:'rev',cat:'Выручка от продаж'},
+      {key:'cogs',label:{ru:'Себестоимость товаров',uz:'Tovar tan narxi',en:'Cost of Goods Sold'},type:'exp',cat:'Себестоимость товара'},
+      {key:'gross',label:{ru:'ВАЛОВАЯ ПРИБЫЛЬ',uz:'YALPI FOYDA',en:'GROSS PROFIT'},type:'total'},
+      {key:'salary',label:{ru:'Зарплата персонала',uz:'Xodimlar ish haqi',en:'Staff Payroll'},type:'exp',cat:'Зарплата'},
+      {key:'rent',label:{ru:'Аренда торговой точки',uz:'Do\'kon ijarasi',en:'Store Rent'},type:'exp',cat:'Аренда'},
+      {key:'logistics',label:{ru:'Логистика и доставка',uz:'Logistika',en:'Logistics'},type:'exp',cat:'Логистика'},
+      {key:'marketing',label:{ru:'Реклама',uz:'Reklama',en:'Advertising'},type:'exp',cat:'Маркетинг'},
+      {key:'ebitda',label:{ru:'EBITDA',uz:'EBITDA',en:'EBITDA'},type:'total'},
+      {key:'tax',label:{ru:'Налоги',uz:'Soliqlar',en:'Taxes'},type:'exp',cat:'Налоги'},
+      {key:'net',label:{ru:'ЧИСТАЯ ПРИБЫЛЬ',uz:'SOF FOYDA',en:'NET PROFIT'},type:'total'},
+    ],
+    cf: [
+      {key:'ops_in',label:{ru:'Выручка от продаж',uz:'Savdo daromadi',en:'Sales Revenue'},type:'in'},
+      {key:'cogs_out',label:{ru:'Оплата поставщикам',uz:'Yetkazib beruvchilarga to\'lov',en:'Supplier Payments'},type:'out'},
+      {key:'ops_net',label:{ru:'Итого операционная',uz:'Jami operatsion',en:'Net Operating'},type:'total'},
+      {key:'inv_out',label:{ru:'Закупка товара (инвест.)',uz:'Tovar sotib olish',en:'Inventory Purchase'},type:'out'},
+      {key:'inv_net',label:{ru:'Итого инвест.',uz:'Jami investitsiya',en:'Net Investing'},type:'total'},
+      {key:'fin_net',label:{ru:'Итого финансовая',uz:'Jami moliyaviy',en:'Net Financing'},type:'total'},
+    ],
+    bal_assets: [
+      {key:'cash',label:{ru:'Касса и банк',uz:'Kassa va bank',en:'Cash & Bank'},val:45000000},
+      {key:'inventory',label:{ru:'Товарный запас',uz:'Tovar zaxirasi',en:'Inventory'},val:65000000},
+      {key:'recv',label:{ru:'Дебиторская задолженность',uz:'Debitorlik',en:'Receivables'},val:18000000},
+      {key:'fixed',label:{ru:'Основные средства',uz:'Asosiy vositalar',en:'Fixed Assets'},val:42000000},
+    ],
+    bal_liab: [
+      {key:'pay',label:{ru:'Кредиторка (поставщики)',uz:'Kreditorlik',en:'Payables'},val:28000000},
+      {key:'loans',label:{ru:'Кредиты',uz:'Kreditlar',en:'Loans'},val:22000000},
+      {key:'tax_p',label:{ru:'Налоги',uz:'Soliqlar',en:'Taxes'},val:4000000},
+      {key:'equity',label:{ru:'Собственный капитал',uz:'Kapital',en:'Equity'},val:116000000},
+    ]
+  },
+  wholesale: {
+    name: {ru:'Оптовая торговля', uz:'Ulgurji savdo', en:'Wholesale'},
+    pnl: [
+      {key:'rev_wholesale',label:{ru:'Выручка от оптовых продаж',uz:'Ulgurji savdo daromadi',en:'Wholesale Revenue'},type:'rev',cat:'Выручка от продаж'},
+      {key:'cogs',label:{ru:'Себестоимость товаров',uz:'Tovar tan narxi',en:'COGS'},type:'exp',cat:'Себестоимость товара'},
+      {key:'gross',label:{ru:'ВАЛОВАЯ ПРИБЫЛЬ',uz:'YALPI FOYDA',en:'GROSS PROFIT'},type:'total'},
+      {key:'logistics',label:{ru:'Логистика и склад',uz:'Logistika va ombor',en:'Logistics & Warehouse'},type:'exp',cat:'Логистика'},
+      {key:'salary',label:{ru:'Зарплата',uz:'Ish haqi',en:'Payroll'},type:'exp',cat:'Зарплата'},
+      {key:'customs',label:{ru:'Таможенные расходы',uz:'Bojxona xarajatlari',en:'Customs'},type:'exp',cat:'Таможня'},
+      {key:'ebitda',label:{ru:'EBITDA',uz:'EBITDA',en:'EBITDA'},type:'total'},
+      {key:'tax',label:{ru:'Налоги',uz:'Soliqlar',en:'Taxes'},type:'exp',cat:'Налоги'},
+      {key:'net',label:{ru:'ЧИСТАЯ ПРИБЫЛЬ',uz:'SOF FOYDA',en:'NET PROFIT'},type:'total'},
+    ],
+    cf: [
+      {key:'ops_in',label:{ru:'Оплата от покупателей',uz:'Xaridorlardan to\'lov',en:'Buyer Payments'},type:'in'},
+      {key:'ops_out',label:{ru:'Оплата поставщикам',uz:'Yetkazib beruvchilarga',en:'Supplier Payments'},type:'out'},
+      {key:'ops_net',label:{ru:'Итого операционная',uz:'Jami operatsion',en:'Net Operating'},type:'total'},
+      {key:'inv_out',label:{ru:'Инвестиции в склад',uz:'Ombor investitsiyasi',en:'Warehouse Investment'},type:'out'},
+      {key:'inv_net',label:{ru:'Итого инвест.',uz:'Jami investitsiya',en:'Net Investing'},type:'total'},
+      {key:'fin_net',label:{ru:'Итого финансовая',uz:'Jami moliyaviy',en:'Net Financing'},type:'total'},
+    ],
+    bal_assets: [
+      {key:'cash',label:{ru:'Денежные средства',uz:'Pul mablag\'lari',en:'Cash'},val:72000000},
+      {key:'recv',label:{ru:'Дебиторская задолженность',uz:'Debitorlik',en:'Receivables'},val:95000000},
+      {key:'inventory',label:{ru:'Товарный запас',uz:'Tovar zaxirasi',en:'Inventory'},val:120000000},
+      {key:'fixed',label:{ru:'Склад и оборудование',uz:'Ombor va uskunalar',en:'Warehouse & Equipment'},val:85000000},
+    ],
+    bal_liab: [
+      {key:'pay',label:{ru:'Кредиторка',uz:'Kreditorlik',en:'Payables'},val:65000000},
+      {key:'loans',label:{ru:'Кредиты',uz:'Kreditlar',en:'Loans'},val:45000000},
+      {key:'tax_p',label:{ru:'Налоги',uz:'Soliqlar',en:'Taxes'},val:8000000},
+      {key:'equity',label:{ru:'Собственный капитал',uz:'Kapital',en:'Equity'},val:254000000},
+    ]
+  },
+  production: {
+    name: {ru:'Производство', uz:'Ishlab chiqarish', en:'Production'},
+    pnl: [
+      {key:'rev_prod',label:{ru:'Выручка от продаж продукции',uz:'Mahsulot sotish daromadi',en:'Product Sales Revenue'},type:'rev',cat:'Выручка от продаж'},
+      {key:'raw_mat',label:{ru:'Сырьё и материалы',uz:'Xom ashyo',en:'Raw Materials'},type:'exp',cat:'Себестоимость товара'},
+      {key:'labor',label:{ru:'Производственный персонал',uz:'Ishlab chiqarish xodimlari',en:'Production Labor'},type:'exp',cat:'Зарплата'},
+      {key:'gross',label:{ru:'ВАЛОВАЯ ПРИБЫЛЬ',uz:'YALPI FOYDA',en:'GROSS PROFIT'},type:'total'},
+      {key:'overhead',label:{ru:'Накладные расходы',uz:'Umumiy xarajatlar',en:'Overhead'},type:'exp',cat:'Коммунальные'},
+      {key:'depr',label:{ru:'Амортизация',uz:'Amortizatsiya',en:'Depreciation'},type:'exp',cat:'Амортизация'},
+      {key:'ebitda',label:{ru:'EBITDA',uz:'EBITDA',en:'EBITDA'},type:'total'},
+      {key:'tax',label:{ru:'Налоги',uz:'Soliqlar',en:'Taxes'},type:'exp',cat:'Налоги'},
+      {key:'net',label:{ru:'ЧИСТАЯ ПРИБЫЛЬ',uz:'SOF FOYDA',en:'NET PROFIT'},type:'total'},
+    ],
+    cf: [
+      {key:'ops_in',label:{ru:'Оплата за продукцию',uz:'Mahsulot uchun to\'lov',en:'Product Revenue'},type:'in'},
+      {key:'raw_out',label:{ru:'Закупка сырья',uz:'Xom ashyo xarid',en:'Raw Material Purchase'},type:'out'},
+      {key:'ops_net',label:{ru:'Итого операционная',uz:'Jami operatsion',en:'Net Operating'},type:'total'},
+      {key:'capex',label:{ru:'Капвложения (оборудование)',uz:'Uskunalar',en:'Capex (Equipment)'},type:'out'},
+      {key:'inv_net',label:{ru:'Итого инвест.',uz:'Jami investitsiya',en:'Net Investing'},type:'total'},
+      {key:'fin_net',label:{ru:'Итого финансовая',uz:'Jami moliyaviy',en:'Net Financing'},type:'total'},
+    ],
+    bal_assets: [
+      {key:'cash',label:{ru:'Денежные средства',uz:'Pul mablag\'lari',en:'Cash'},val:35000000},
+      {key:'raw',label:{ru:'Запасы сырья',uz:'Xom ashyo zaxirasi',en:'Raw Material Stock'},val:48000000},
+      {key:'wip',label:{ru:'Незавершённое производство',uz:'Tugallanmagan ishlab chiqarish',en:'WIP'},val:22000000},
+      {key:'fixed',label:{ru:'Оборудование и здания',uz:'Uskunalar va binolar',en:'Equipment & Buildings'},val:185000000},
+    ],
+    bal_liab: [
+      {key:'pay',label:{ru:'Кредиторка',uz:'Kreditorlik',en:'Payables'},val:42000000},
+      {key:'loans',label:{ru:'Долгосрочные кредиты',uz:'Uzoq muddatli kreditlar',en:'Long-term Loans'},val:78000000},
+      {key:'tax_p',label:{ru:'Налоги',uz:'Soliqlar',en:'Taxes'},val:12000000},
+      {key:'equity',label:{ru:'Собственный капитал',uz:'Kapital',en:'Equity'},val:158000000},
+    ]
+  }
+};
+
+// ═══════════════════════════════════════════════
+// ПЕРЕВОДЫ
+// ═══════════════════════════════════════════════
+const T = {
+  ru:{
+    main:'ОСНОВНЫЕ',aux:'ВСПОМОГАТЕЛЬНЫЕ',ref:'СПРАВОЧНИКИ',
+    dashboard:'📊 Дашборд',operations:'📋 Операции',pnl:'📈 P&L (Прибыль и убытки)',
+    cashflow:'💵 Cash Flow (ДДС)',balance:'⚖️ Баланс',salary:'💼 Зарплата',
+    receivables:'📈 Дебиторка',payables:'📉 Кредиторка',loans_out:'🔼 Займы выданные',
+    loans_in:'🔽 Займы полученные',taxes:'🧾 Налоги',directory:'📁 Контрагенты',currency:'💱 Курсы валют',
+    period:'Период:',apply:'Применить',reset:'Сбросить',
+    add_op:'Добавить операцию',import_lbl:'📥 Импорт Excel',
+    dash_title:'Дашборд',revenue:'Выручка',expenses:'Расходы',profit:'Прибыль',margin:'Маржа',
+    receivables_kpi:'Дебиторка',payables_kpi:'Кредиторка',
+    exp_struct:'Структура расходов',rev_struct:'Выручка по статьям',monthly_dyn:'Динамика по месяцам',
+    cashflow_title:'Cash Flow — итог месяца',top_exp:'Топ расходов',
+    ops_title:'Журнал операций',ops_sub:'Все транзакции из импорта и ручного ввода',
+    all:'Все типы',all_cat:'Все статьи',
+    date:'Дата',description:'Описание',income:'Приход',expense_col:'Расход',uzs:'Сумма (UZS)',
+    category:'Статья',report_type:'Тип',contractor:'Контрагент',
+    pnl_title:'P&L — Прибыль и убытки',choose_industry:'Выберите отрасль для шаблона',
+    services:'🏢 Услуги',retail:'🛒 Розница',wholesale:'📦 Оптовая торговля',production:'🏭 Производство',
+    export:'⬇ Экспорт',pnl_chart:'График P&L',mapping_title:'Маппинг статей из Excel',
+    item:'Статья',month:'Месяц',
+    cf_title:'Cash Flow — Движение денежных средств',open_bal:'Остаток начало',
+    net_flow:'Чистый поток',close_bal:'Остаток конец',section:'Раздел',
+    cf_chart:'Структура Cash Flow',
+    bal_title:'Баланс',assets:'Активы',liabilities:'Пассивы',assets_chart:'Структура активов',liab_chart:'Структура пассивов',sum:'Сумма',
+    salary_title:'Зарплатная ведомость',total_sal:'Всего зарплат',emp_count:'Сотрудников',paid_sal:'Выплачено',debt_sal:'Долг',
+    emp_list:'Список сотрудников',name:'Сотрудник',dept:'Отдел',salary_col:'Оклад',bonus:'Бонус',status:'Статус',sal_chart:'По отделам',
+    deb_title:'Дебиторская задолженность',deb_sub:'Контрагенты, которые должны вам',
+    total_deb:'Всего дебиторка',overdue:'Просрочено',count:'Контрагентов',avg_days:'Ср. дней',
+    deb_list:'Список должников',company:'Компания',amount:'Сумма',due_date:'Срок',days:'Дней',deb_chart:'Дебиторка по контрагентам',
+    kred_title:'Кредиторская задолженность',kred_sub:'Контрагенты, которым вы должны',
+    total_kred:'Всего кредиторка',suppliers:'Поставщиков',next_pay:'Следующий платёж',
+    kred_list:'Список кредиторов',supplier:'Поставщик',priority:'Приоритет',
+    lout_title:'Займы выданные',lout_sub:'Деньги, выданные другим',
+    total_issued:'Всего выдано',returned:'Возвращено',outstanding:'Остаток',interest:'% доход',
+    loans_list:'Список займов',borrower:'Заёмщик',total:'Сумма',balance:'Остаток',
+    lin_title:'Займы полученные',lin_sub:'Банковские кредиты и займы',
+    total_debt:'Всего долг',repaid:'Погашено',remaining:'Остаток',monthly_pay:'Ежемесячно',
+    loans_in_list:'Кредиты',lender:'Кредитор',monthly:'Ежемес.',end_date:'Срок',loans_chart:'График погашения',
+    tax_title:'Налоговый отчёт',tax_sub:'Налоговые обязательства',total_tax:'Всего',paid_tax:'Уплачено',
+    debt_tax:'Долг',next_deadline:'Следующий срок',tax_list:'Виды налогов',tax_type:'Налог',
+    period_col:'Период',accrued:'Начислено',paid:'Уплачено',tax_chart:'Статус оплаты',
+    dir_title:'Справочник контрагентов',dir_sub:'Клиенты, поставщики, счета',
+    add_contractor:'Добавить контрагента',type:'Тип',client:'Клиент',
+    supplier_t:'Поставщик',bank:'Счёт в банке',cash:'Касса',dir_list:'Список',
+    curr_title:'Курсы валют',curr_sub:'Базовая валюта: UZS',curr_rates:'Текущие курсы',
+    save:'Сохранить',cancel:'Отмена',currency:'Валюта',
+    my_account:'Мой кабинет',current_plan:'Текущий план: Pro',plan_expires:'Действует до: 31 декабря 2025',
+    plan_features:'✓ Все отчёты  ✓ Импорт Excel  ✓ Все отрасли  ✓ 3 компании',
+    transactions:'Транзакций',contractors:'Контрагентов',active_period:'Активный период',language:'Язык',
+    tariffs:'ТАРИФЫ',per_month:'в месяц',settings:'НАСТРОЙКИ',
+    edit_profile:'Редактировать профиль',change_pass:'Сменить пароль',notifications:'Уведомления',logout:'Выйти',
+  },
+  uz:{
+    main:'ASOSIY',aux:'YORDAMCHI',ref:'MA\'LUMOTLAR',
+    dashboard:'📊 Dashboard',operations:'📋 Operatsiyalar',pnl:'📈 P&L (Foyda va zarar)',
+    cashflow:'💵 Cash Flow (Pul oqimi)',balance:'⚖️ Balans',salary:'💼 Ish haqi',
+    receivables:'📈 Debitorka',payables:'📉 Kreditorka',loans_out:'🔼 Berilgan qarzlar',
+    loans_in:'🔽 Olingan qarzlar',taxes:'🧾 Soliqlar',directory:'📁 Kontragentlar',currency:'💱 Valyuta kurslari',
+    period:'Davr:',apply:'Qo\'llash',reset:'Tozalash',
+    add_op:'Operatsiya qo\'shish',import_lbl:'📥 Excel import',
+    dash_title:'Dashboard',revenue:'Daromad',expenses:'Xarajat',profit:'Foyda',margin:'Marja',
+    receivables_kpi:'Debitorka',payables_kpi:'Kreditorka',
+    exp_struct:'Xarajat tuzilishi',rev_struct:'Daromad manbai',monthly_dyn:'Oylik dinamika',
+    cashflow_title:'Cash Flow — oy yakunlari',top_exp:'Eng katta xarajatlar',
+    ops_title:'Operatsiyalar jurnali',ops_sub:'Import va qo\'lda kiritilgan barcha tranzaksiyalar',
+    all:'Barcha turlar',all_cat:'Barcha maqolalar',
+    date:'Sana',description:'Tavsif',income:'Kirim',expense_col:'Chiqim',uzs:'Summa (UZS)',
+    category:'Maqola',report_type:'Tur',contractor:'Kontragent',
+    pnl_title:'P&L — Foyda va zarar hisoboti',choose_industry:'Soha shablonini tanlang',
+    services:'🏢 Xizmatlar',retail:'🛒 Chakana savdo',wholesale:'📦 Ulgurji savdo',production:'🏭 Ishlab chiqarish',
+    export:'⬇ Eksport',pnl_chart:'P&L grafigi',mapping_title:'Excel maqolalarini moslashtirish',
+    item:'Maqola',month:'Oy',
+    cf_title:'Cash Flow — Pul oqimi',open_bal:'Oy boshi qoldiq',
+    net_flow:'Sof oqim',close_bal:'Oy oxiri qoldiq',section:'Bo\'lim',
+    cf_chart:'Cash Flow tuzilishi',
+    bal_title:'Balans',assets:'Aktivlar',liabilities:'Passivlar',assets_chart:'Aktiv tuzilishi',liab_chart:'Passiv tuzilishi',sum:'Summa',
+    salary_title:'Ish haqi vedomosti',total_sal:'Jami ish haqi',emp_count:'Xodimlar',paid_sal:'To\'langan',debt_sal:'Qoldiq',
+    emp_list:'Xodimlar ro\'yxati',name:'Xodim',dept:'Bo\'lim',salary_col:'Ish haqi',bonus:'Bonus',status:'Holat',sal_chart:'Bo\'limlar bo\'yicha',
+    deb_title:'Debitorlik qarzi',deb_sub:'Sizga qarzdor kontragentlar',
+    total_deb:'Jami debitorka',overdue:'Muddati o\'tgan',count:'Kontragentlar',avg_days:'O\'rt. kun',
+    deb_list:'Qarzdorlar ro\'yxati',company:'Kompaniya',amount:'Summa',due_date:'Muddat',days:'Kun',deb_chart:'Kontragentlar bo\'yicha',
+    kred_title:'Kreditorlik qarzi',kred_sub:'Siz qarzdor bo\'lgan kontragentlar',
+    total_kred:'Jami kreditorka',suppliers:'Yetkazib beruvchilar',next_pay:'Keyingi to\'lov',
+    kred_list:'Kreditorlar ro\'yxati',supplier:'Yetkazib beruvchi',priority:'Muhimlik',
+    lout_title:'Berilgan qarzlar',lout_sub:'Boshqalarga berilgan pul',
+    total_issued:'Jami berilgan',returned:'Qaytarilgan',outstanding:'Qoldiq',interest:'Foiz daromadi',
+    loans_list:'Qarzlar ro\'yxati',borrower:'Qarz oluvchi',total:'Summa',balance:'Qoldiq',
+    lin_title:'Olingan qarzlar',lin_sub:'Bank kreditlari va boshqa qarzlar',
+    total_debt:'Jami qarz',repaid:'To\'langan',remaining:'Qoldiq',monthly_pay:'Oylik to\'lov',
+    loans_in_list:'Kreditlar',lender:'Kreditor',monthly:'Oylik',end_date:'Tugash',loans_chart:'To\'lash grafigi',
+    tax_title:'Soliqlar hisoboti',tax_sub:'Soliq majburiyatlari',total_tax:'Jami',paid_tax:'To\'langan',
+    debt_tax:'Qoldiq',next_deadline:'Keyingi muddat',tax_list:'Soliq turlari',tax_type:'Soliq',
+    period_col:'Davr',accrued:'Hisoblangan',paid:'To\'langan',tax_chart:'To\'lov holati',
+    dir_title:'Kontragentlar ma\'lumotnoması',dir_sub:'Mijozlar, yetkazib beruvchilar, hisoblar',
+    add_contractor:'Kontragent qo\'shish',type:'Tur',client:'Mijoz',
+    supplier_t:'Yetkazib beruvchi',bank:'Bank hisobi',cash:'Kassa',dir_list:'Ro\'yxat',
+    curr_title:'Valyuta kurslari',curr_sub:'Asosiy valyuta: UZS',curr_rates:'Joriy kurslar',
+    save:'Saqlash',cancel:'Bekor qilish',currency:'Valyuta',
+    my_account:'Mening kabinetim',current_plan:'Joriy tarif: Pro',plan_expires:'Amal qilish muddati: 31 dekabr 2025',
+    plan_features:'✓ Barcha hisobotlar  ✓ Excel import  ✓ Barcha sohalar  ✓ 3 kompaniya',
+    transactions:'Tranzaksiyalar',contractors:'Kontragentlar',active_period:'Faol davr',language:'Til',
+    tariffs:'TARIFLAR',per_month:'oyiga',settings:'SOZLAMALAR',
+    edit_profile:'Profilni tahrirlash',change_pass:'Parolni o\'zgartirish',notifications:'Bildirishnomalar',logout:'Chiqish',
+  },
+  en:{
+    main:'MAIN',aux:'SUPPORTING',ref:'REFERENCES',
+    dashboard:'📊 Dashboard',operations:'📋 Operations',pnl:'📈 P&L',
+    cashflow:'💵 Cash Flow',balance:'⚖️ Balance Sheet',salary:'💼 Payroll',
+    receivables:'📈 Receivables',payables:'📉 Payables',loans_out:'🔼 Loans Issued',
+    loans_in:'🔽 Loans Received',taxes:'🧾 Taxes',directory:'📁 Contractors',currency:'💱 Exchange Rates',
+    period:'Period:',apply:'Apply',reset:'Reset',
+    add_op:'Add Transaction',import_lbl:'📥 Import Excel',
+    dash_title:'Dashboard',revenue:'Revenue',expenses:'Expenses',profit:'Profit',margin:'Margin',
+    receivables_kpi:'Receivables',payables_kpi:'Payables',
+    exp_struct:'Expense Breakdown',rev_struct:'Revenue by Category',monthly_dyn:'Monthly Dynamics',
+    cashflow_title:'Cash Flow — Monthly Summary',top_exp:'Top Expenses',
+    ops_title:'Operations Log',ops_sub:'All transactions from import and manual entry',
+    all:'All Types',all_cat:'All Categories',
+    date:'Date',description:'Description',income:'Income',expense_col:'Expense',uzs:'Amount (UZS)',
+    category:'Category',report_type:'Type',contractor:'Contractor',
+    pnl_title:'P&L — Profit & Loss',choose_industry:'Choose Industry Template',
+    services:'🏢 Services',retail:'🛒 Retail',wholesale:'📦 Wholesale',production:'🏭 Production',
+    export:'⬇ Export',pnl_chart:'P&L Chart',mapping_title:'Excel Column Mapping',
+    item:'Item',month:'Month',
+    cf_title:'Cash Flow Statement',open_bal:'Opening Balance',
+    net_flow:'Net Cash Flow',close_bal:'Closing Balance',section:'Section',
+    cf_chart:'Cash Flow Structure',
+    bal_title:'Balance Sheet',assets:'Assets',liabilities:'Liabilities',assets_chart:'Asset Structure',liab_chart:'Liability Structure',sum:'Amount',
+    salary_title:'Payroll Report',total_sal:'Total Payroll',emp_count:'Employees',paid_sal:'Paid',debt_sal:'Outstanding',
+    emp_list:'Employee List',name:'Employee',dept:'Department',salary_col:'Salary',bonus:'Bonus',status:'Status',sal_chart:'By Department',
+    deb_title:'Accounts Receivable',deb_sub:'Counterparties who owe you',
+    total_deb:'Total Receivables',overdue:'Overdue',count:'Counterparties',avg_days:'Avg Days',
+    deb_list:'Debtors List',company:'Company',amount:'Amount',due_date:'Due Date',days:'Days',deb_chart:'By Counterparty',
+    kred_title:'Accounts Payable',kred_sub:'Counterparties you owe',
+    total_kred:'Total Payables',suppliers:'Suppliers',next_pay:'Next Payment',
+    kred_list:'Creditors List',supplier:'Supplier',priority:'Priority',
+    lout_title:'Loans Issued',lout_sub:'Money lent to others',
+    total_issued:'Total Issued',returned:'Returned',outstanding:'Outstanding',interest:'Interest Income',
+    loans_list:'Loans List',borrower:'Borrower',total:'Amount',balance:'Balance',
+    lin_title:'Loans Received',lin_sub:'Bank loans and borrowings',
+    total_debt:'Total Debt',repaid:'Repaid',remaining:'Remaining',monthly_pay:'Monthly Payment',
+    loans_in_list:'Loans',lender:'Lender',monthly:'Monthly',end_date:'End Date',loans_chart:'Repayment Schedule',
+    tax_title:'Tax Report',tax_sub:'Tax obligations',total_tax:'Total',paid_tax:'Paid',
+    debt_tax:'Outstanding',next_deadline:'Next Deadline',tax_list:'Tax Types',tax_type:'Tax',
+    period_col:'Period',accrued:'Accrued',paid:'Paid',tax_chart:'Payment Status',
+    dir_title:'Contractors Directory',dir_sub:'Clients, suppliers, accounts',
+    add_contractor:'Add Contractor',type:'Type',client:'Client',
+    supplier_t:'Supplier',bank:'Bank Account',cash:'Cash',dir_list:'List',
+    curr_title:'Exchange Rates',curr_sub:'Base Currency: UZS',curr_rates:'Current Rates',
+    save:'Save',cancel:'Cancel',currency:'Currency',
+    my_account:'My Account',current_plan:'Current Plan: Pro',plan_expires:'Valid until: December 31, 2025',
+    plan_features:'✓ All reports  ✓ Excel import  ✓ All industries  ✓ 3 companies',
+    transactions:'Transactions',contractors:'Contractors',active_period:'Active Period',language:'Language',
+    tariffs:'TARIFFS',per_month:'per month',settings:'SETTINGS',
+    edit_profile:'Edit Profile',change_pass:'Change Password',notifications:'Notifications',logout:'Log Out',
+  }
+};
+
+// ═══════════════════════════════════════════════
+// ЯЗЫК
+// ═══════════════════════════════════════════════
+function setLang(lang, btn) {
+  S.lang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const t = T[lang];
+  document.querySelectorAll('[data-key]').forEach(el => {
+    const k = el.getAttribute('data-key');
+    if(t[k] !== undefined) el.textContent = t[k];
+  });
+  // Re-render reports to update labels
+  refreshAll();
+}
+
+// ═══════════════════════════════════════════════
+// НАВИГАЦИЯ
+// ═══════════════════════════════════════════════
+const charts = {};
+function nav(page, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(el) el.classList.add('active');
+  setTimeout(()=>initPageCharts(page), 60);
+  if(page==='dashboard') refreshDash();
+  if(page==='operations') renderOps();
+  if(page==='pnl') renderPnl();
+  if(page==='cashflow') renderCF();
+  if(page==='balance') renderBalance();
+  if(page==='salary') renderSalary();
+  if(page==='receivables') renderReceivables();
+  if(page==='payables') renderPayables();
+  if(page==='loans_out') renderLoansOut();
+  if(page==='loans_in') renderLoansIn();
+  if(page==='directory') renderDir();
+  if(page==='currency') renderRates();
+  if(page==='admin' && typeof refreshAdminPage !== 'undefined') refreshAdminPage();
+  if(typeof saveCurrentCompany !== 'undefined') saveCurrentCompany();
+}
+
+// ═══════════════════════════════════════════════
+// ФИЛЬТР
+// ═══════════════════════════════════════════════
+let activeFilter = {month:'06',year:'2025'};
+function applyFilter() {
+  activeFilter.month = document.getElementById('f-month').value;
+  activeFilter.year = document.getElementById('f-year').value;
+  if (typeof saveCurrentCompany !== 'undefined') saveCurrentCompany();
+  const months = {ru:{
+    '01':'Январь','02':'Февраль','03':'Март','04':'Апрель','05':'Май','06':'Июнь',
+    '07':'Июль','08':'Август','09':'Сентябрь','10':'Октябрь','11':'Ноябрь','12':'Декабрь','':`${activeFilter.year}`
+  }};
+  const mn = months.ru[activeFilter.month]||activeFilter.month;
+  document.getElementById('filter-display').textContent = activeFilter.month ? `${mn} ${activeFilter.year}` : activeFilter.year;
+  refreshAll();
+  notify('Фильтр применён');
+}
+function clearFilter() {
+  activeFilter = {month:'',year:'2025'};
+  document.getElementById('f-month').value='';
+  document.getElementById('filter-display').textContent = '2025';
+  refreshAll();
+}
+function getFiltered() {
+  return S.transactions.filter(t => {
+    if(!t.date) return true;
+    const [y,m] = t.date.split('-');
+    if(activeFilter.year && y !== activeFilter.year) return false;
+    if(activeFilter.month && m !== activeFilter.month) return false;
+    return true;
+  });
+}
+
+// ═══════════════════════════════════════════════
+// ДАШБОРД
+// ═══════════════════════════════════════════════
+function refreshDash() {
+  const txs = getFiltered();
+  let rev=0, exp=0;
+  txs.forEach(t => { if(t.amountUzs>0) rev+=t.amountUzs; else exp+=Math.abs(t.amountUzs); });
+  const prf = rev-exp, mgn = rev>0 ? (prf/rev*100).toFixed(1) : 0;
+  const fmt = v => v>=1e6 ? (v/1e6).toFixed(1)+'M' : v>=1000 ? (v/1000).toFixed(0)+'K' : v.toLocaleString();
+  setEl('d-rev', fmt(rev), 'G');
+  setEl('d-exp', fmt(exp));
+  setEl('d-prf', (prf>=0?'+':'')+fmt(prf), prf>=0?'G':'R');
+  document.getElementById('d-mgn').textContent = mgn+'%';
+  // Deb/Kred from static
+  setEl('d-deb', '24.1M', 'A');
+  setEl('d-kred', '11.6M', 'R');
+
+  // Top expenses
+  const cats = {};
+  txs.filter(t=>t.amountUzs<0).forEach(t => { cats[t.category]=(cats[t.category]||0)+Math.abs(t.amountUzs); });
+  const sorted = Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const max = sorted[0]?.[1]||1;
+  document.getElementById('top-exp-list').innerHTML = sorted.map(([k,v])=>
+    `<div class="bar-row"><span class="bar-lbl">${k}</span><div class="bar-track"><div class="bar-fill" style="width:${v/max*100}%;background:var(--red)"></div></div><span class="bar-val">${fmt(v)}</span></div>`
+  ).join('');
+
+  // Charts
+  destroyChart('ch-exp-donut');
+  destroyChart('ch-rev-donut');
+  destroyChart('ch-trend');
+  destroyChart('ch-cf-bar');
+  const expCats = {}, revCats = {};
+  txs.forEach(t => {
+    if(t.amountUzs<0) expCats[t.category]=(expCats[t.category]||0)+Math.abs(t.amountUzs);
+    else revCats[t.category]=(revCats[t.category]||0)+t.amountUzs;
+  });
+  makeDonut('ch-exp-donut', Object.keys(expCats), Object.values(expCats));
+  makeDonut('ch-rev-donut', Object.keys(revCats), Object.values(revCats), ['#1D9E75','#5DCAA5','#0F6E56','#A8E6D0','#378ADD']);
+
+  // Trend (all months)
+  const monthly = {};
+  S.transactions.forEach(t => {
+    const m = t.date?.slice(0,7)||'?';
+    if(!monthly[m]) monthly[m]={rev:0,exp:0};
+    if(t.amountUzs>0) monthly[m].rev+=t.amountUzs; else monthly[m].exp+=Math.abs(t.amountUzs);
+  });
+  const mKeys = Object.keys(monthly).sort();
+  makeBarLine('ch-trend', mKeys, mKeys.map(m=>monthly[m].rev/1e6), mKeys.map(m=>monthly[m].exp/1e6), mKeys.map(m=>(monthly[m].rev-monthly[m].exp)/1e6));
+
+  // CF bar
+  const cfIn = txs.filter(t=>t.type==='CF'&&t.amountUzs>0).reduce((s,t)=>s+t.amountUzs,0);
+  const cfOut = txs.filter(t=>t.type==='CF'&&t.amountUzs<0).reduce((s,t)=>s+Math.abs(t.amountUzs),0);
+  makeSimpleBar('ch-cf-bar', ['Поступления','Выплаты','Нетто'], [cfIn/1e6, cfOut/1e6, (cfIn-cfOut)/1e6], ['#1D9E75','#E24B4A', (cfIn-cfOut)>=0?'#1D9E75':'#E24B4A']);
+}
+
+// ═══════════════════════════════════════════════
+// ОПЕРАЦИИ
+// ═══════════════════════════════════════════════
+function renderOps() {
+  let txs = getFiltered();
+  const tf = document.getElementById('ops-type').value;
+  const cf = document.getElementById('ops-cat').value;
+  if(tf!=='ALL') txs = txs.filter(t=>t.type===tf);
+  if(cf!=='ALL') txs = txs.filter(t=>t.category===cf);
+
+  // Update cat filter options
+  const cats = [...new Set(S.transactions.map(t=>t.category))];
+  const catSel = document.getElementById('ops-cat');
+  const cur = catSel.value;
+  catSel.innerHTML = `<option value="ALL">Все статьи</option>`+cats.map(c=>`<option value="${c}"${c===cur?' selected':''}>${c}</option>`).join('');
+
+  document.getElementById('ops-count').textContent = `${txs.length} записей`;
+  const fmt = v => v>=1e6?(v/1e6).toFixed(2)+'M':v.toLocaleString();
+  document.getElementById('ops-body').innerHTML = txs.map(t=>{
+    const cn = S.directory.find(d=>d.id===t.contractor)?.name||'—';
+    const inc = t.amountUzs>0 ? `<span class="ap">${fmt(Math.abs(t.amount))} ${t.currency}</span>` : '';
+    const exp = t.amountUzs<0 ? `<span class="am">${fmt(Math.abs(t.amount))} ${t.currency}</span>` : '';
+    return `<tr><td>${t.date}</td><td>${t.desc}</td><td>${inc}</td><td>${exp}</td><td>${t.currency}</td><td class="${t.amountUzs>=0?'ap':'am'}">${(t.amountUzs>=0?'+':'')}${fmt(Math.abs(t.amountUzs))}</td><td><span class="badge bb">${t.category}</span></td><td><span class="badge bp">${t.type}</span></td><td>${cn}</td></tr>`;
+  }).join('');
+}
+function resetOpsFilters() {
+  document.getElementById('ops-type').value='ALL';
+  renderOps();
+}
+
+// ═══════════════════════════════════════════════
+// P&L
+// ═══════════════════════════════════════════════
+function setIndustry(ind, btn, report) {
+  S.industry[report] = ind;
+  btn.closest('.ind-tabs').querySelectorAll('.ind-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(report==='pnl') renderPnl();
+  if(report==='cf') renderCF();
+  if(report==='bal') renderBalance();
+}
+
+function renderPnl() {
+  const ind = S.industry.pnl;
+  const tpl = TEMPLATES[ind];
+  const txs = getFiltered().filter(t=>t.type==='PNL');
+  document.getElementById('pnl-tpl-name').textContent = `P&L — ${tpl.name[S.lang]}`;
+
+  // Calc from transactions
+  const catTotals = {};
+  txs.forEach(t => { catTotals[t.category]=(catTotals[t.category]||0)+t.amountUzs; });
+
+  let grossRev=0, grossExp=0, opex=0;
+  const fmt = v => v>=1e6?(v/1e6).toFixed(2)+'M':v.toLocaleString();
+
+  // Calculate values per line
+  const rows = [];
+  let runTotal = 0;
+  tpl.pnl.forEach(line => {
+    if(line.type==='rev') {
+      const val = catTotals[line.cat]||0;
+      grossRev+=val;
+      runTotal+=val;
+      rows.push({label:line.label[S.lang], val, month:fmt(val), ytd:fmt(val*6), pct:'100%', isTotal:false, isPos:true});
+    } else if(line.type==='exp') {
+      const val = catTotals[line.cat]||0;
+      grossExp+=Math.abs(val);
+      const display = val<0?val:val>0?-val:0;
+      runTotal+=display;
+      rows.push({label:line.label[S.lang], val:display, month:fmt(val>0?val:Math.abs(val)), ytd:fmt((val>0?val:Math.abs(val))*6), pct: grossRev>0?(Math.abs(val)/grossRev*100).toFixed(1)+'%':'—', isTotal:false, isPos:false});
+    } else {
+      // total lines
+      const isProfit = runTotal >= 0;
+      rows.push({label:line.label[S.lang], val:runTotal, month:(runTotal>=0?'+':'')+fmt(Math.abs(runTotal)), ytd:(runTotal>=0?'+':'')+fmt(Math.abs(runTotal)*6), pct:'—', isTotal:true, isPos:runTotal>=0});
+      if(line.key==='gross') runTotal = runTotal; // keep
+    }
+  });
+
+  document.getElementById('pnl-body').innerHTML = rows.map(r=>`
+    <tr${r.isTotal?' class="total-row"':''}>
+      <td>${r.label}</td>
+      <td class="${r.isTotal?(r.isPos?'ap':'am'):(r.isPos?'ap':'am')}">${r.month}</td>
+      <td style="color:var(--text2)">${r.ytd}</td>
+      <td style="color:var(--text3)">${r.pct}</td>
+    </tr>`).join('');
+
+  // Mapping hint
+  const allCats = [...new Set(txs.map(t=>t.category))];
+  document.getElementById('mapping-list').innerHTML = allCats.length
+    ? allCats.map(c=>`<div style="padding:3px 0;border-bottom:1px solid var(--border)">• ${c}: <span style="color:var(--green);font-weight:600">${fmt(Math.abs(catTotals[c]||0))}</span></div>`).join('')
+    : '<p>Импортируйте Excel для автоматического маппинга статей.</p>';
+
+  destroyChart('ch-pnl');
+  const revVal = txs.filter(t=>t.amountUzs>0).reduce((s,t)=>s+t.amountUzs,0);
+  const expVal = txs.filter(t=>t.amountUzs<0).reduce((s,t)=>s+Math.abs(t.amountUzs),0);
+  makeBarLine('ch-pnl', ['Янв','Фев','Мар','Апр','Май','Июн'],
+    [82,95,108,115,122,revVal/1e6||148],
+    [55,62,70,74,79,expVal/1e6||89],
+    [27,33,38,41,43,(revVal-expVal)/1e6||59]);
+}
+
+// ═══════════════════════════════════════════════
+// CASH FLOW
+// ═══════════════════════════════════════════════
+function renderCF() {
+  const ind = S.industry.cf;
+  const tpl = TEMPLATES[ind];
+  document.getElementById('cf-tpl-name').textContent = `Cash Flow — ${tpl.name[S.lang]}`;
+
+  const txs = getFiltered().filter(t=>t.type==='CF');
+  const cfIn = txs.filter(t=>t.amountUzs>0).reduce((s,t)=>s+t.amountUzs,0);
+  const cfOut = txs.filter(t=>t.amountUzs<0).reduce((s,t)=>s+Math.abs(t.amountUzs),0);
+  const net = cfIn - cfOut;
+  const openBal = 43200000;
+
+  const fmt = v => v>=1e6?(v/1e6).toFixed(2)+'M':v.toLocaleString();
+  document.getElementById('cf-open').textContent = fmt(openBal);
+  document.getElementById('cf-net').textContent = (net>=0?'+':'')+fmt(Math.abs(net));
+  document.getElementById('cf-net').className = 'kpi-val '+(net>=0?'G':'R');
+  document.getElementById('cf-close').textContent = fmt(openBal+net);
+
+  // Template rows
+  const cfRows = tpl.cf.map(line => {
+    let inc=0, out=0;
+    if(line.type==='in') { inc = cfIn||0; return {label:line.label[S.lang],inc:fmt(inc),out:'—',net:fmt(inc),type:'in'}; }
+    if(line.type==='out') { out = cfOut||0; return {label:line.label[S.lang],inc:'—',out:fmt(out),net:'-'+fmt(out),type:'out'}; }
+    const n = cfIn-cfOut; return {label:line.label[S.lang],inc:fmt(cfIn),out:fmt(cfOut),net:(n>=0?'+':'')+fmt(Math.abs(n)),type:'total'};
+  });
+
+  document.getElementById('cf-body').innerHTML = cfRows.map(r=>`
+    <tr${r.type==='total'?' class="total-row"':''}>
+      <td>${r.label}</td>
+      <td class="${r.type==='in'?'ap':''}">${r.inc}</td>
+      <td class="${r.type==='out'?'am':''}">${r.out}</td>
+      <td class="${r.type==='total'?(cfIn>cfOut?'ap':'am'):''}">${r.net}</td>
+    </tr>`).join('');
+
+  destroyChart('ch-cf');
+  makeSimpleBar('ch-cf', ['Операционная','Инвестиционная','Финансовая','ИТОГО'],
+    [cfIn/1e6, 0, 0, cfIn/1e6],
+    [[0, cfOut/1e6, 0, cfOut/1e6]],
+    ['#1D9E75','#E24B4A','#378ADD','#7F77DD']);
+}
+
+// ═══════════════════════════════════════════════
+// БАЛАНС
+// ═══════════════════════════════════════════════
+function renderBalance() {
+  const ind = S.industry.bal;
+  const tpl = TEMPLATES[ind];
+  const fmt = v => (v/1e6).toFixed(2)+'M';
+
+  // Assets from import + template
+  const txs = getFiltered();
+  const cash = txs.filter(t=>t.amountUzs>0).reduce((s,t)=>s+t.amountUzs,0) || tpl.bal_assets.find(a=>a.key==='cash')?.val||0;
+  const assets = tpl.bal_assets.map(a => a.key==='cash' ? {...a, val:cash} : a);
+  const liab = tpl.bal_liab;
+  const totalA = assets.reduce((s,a)=>s+a.val,0);
+  const totalL = liab.reduce((s,l)=>s+l.val,0);
+
+  document.getElementById('bal-assets-body').innerHTML =
+    assets.map(a=>`<tr><td>${a.label[S.lang]}</td><td class="ap" style="text-align:right">${fmt(a.val)}</td></tr>`).join('')+
+    `<tr class="total-row"><td><b>${S.lang==='ru'?'ИТОГО АКТИВЫ':S.lang==='uz'?'JAMI AKTIVLAR':'TOTAL ASSETS'}</b></td><td class="ap" style="text-align:right"><b>${fmt(totalA)}</b></td></tr>`;
+
+  document.getElementById('bal-liab-body').innerHTML =
+    liab.map(l=>`<tr><td>${l.label[S.lang]}</td><td class="${l.key==='equity'?'ap':'am'}" style="text-align:right">${fmt(l.val)}</td></tr>`).join('')+
+    `<tr class="total-row"><td><b>${S.lang==='ru'?'ИТОГО ПАССИВЫ':S.lang==='uz'?'JAMI PASSIVLAR':'TOTAL LIABILITIES'}</b></td><td style="text-align:right"><b>${fmt(totalL)}</b></td></tr>`;
+
+  destroyChart('ch-assets');
+  destroyChart('ch-liab');
+  makeDonut('ch-assets', assets.map(a=>a.label[S.lang]), assets.map(a=>a.val));
+  makeDonut('ch-liab', liab.map(l=>l.label[S.lang]), liab.map(l=>l.val), ['#E24B4A','#BA7517','#888780','#1D9E75']);
+}
+
+// ═══════════════════════════════════════════════
+// ЗАРПЛАТА
+// ═══════════════════════════════════════════════
+function renderSalary() {
+  const fmt = v => (v/1000).toFixed(0)+'K';
+  const total = S.salary.reduce((s,e)=>s+e.salary+e.bonus,0);
+  const paid = S.salary.filter(e=>e.status==='paid').reduce((s,e)=>s+e.salary+e.bonus,0);
+  document.getElementById('sal-total').textContent = (total/1e6).toFixed(1)+'M';
+  document.getElementById('sal-cnt').textContent = S.salary.length;
+  document.getElementById('sal-paid').textContent = (paid/1e6).toFixed(1)+'M';
+  document.getElementById('sal-debt').textContent = ((total-paid)/1e6).toFixed(1)+'M';
+
+  const statusMap = {paid:{cls:'bg',ru:'Выплачено',uz:'To\'langan',en:'Paid'},partial:{cls:'ba',ru:'Частично',uz:'Qisman',en:'Partial'},unpaid:{cls:'br',ru:'Не выплачено',uz:'To\'lanmagan',en:'Unpaid'}};
+  document.getElementById('sal-body').innerHTML = S.salary.map(e=>{
+    const s = statusMap[e.status];
+    return `<tr><td>${e.name}</td><td>${e.dept}</td><td class="ap">${fmt(e.salary)}</td><td>${e.bonus?fmt(e.bonus):'—'}</td><td><span class="badge ${s.cls}">${s[S.lang]}</span></td></tr>`;
+  }).join('');
+
+  destroyChart('ch-sal');
+  const depts = {};
+  S.salary.forEach(e=>{ depts[e.dept]=(depts[e.dept]||0)+e.salary+e.bonus; });
+  makeSimpleBar('ch-sal', Object.keys(depts), Object.values(depts).map(v=>v/1e6), Object.keys(depts).map((_,i)=>['#1D9E75','#378ADD','#7F77DD','#D85A30','#BA7517'][i%5]));
+}
+
+// ═══════════════════════════════════════════════
+// ДЕБИТОРКА
+// ═══════════════════════════════════════════════
+function renderReceivables() {
+  const fmt = v=>(v/1e6).toFixed(1)+'M';
+  const total = S.receivables.reduce((s,r)=>s+r.amount,0);
+  const overdue = S.receivables.filter(r=>r.status==='overdue').reduce((s,r)=>s+r.amount,0);
+  document.getElementById('deb-total').textContent = fmt(total);
+  document.getElementById('deb-overdue').textContent = fmt(overdue);
+  document.getElementById('deb-cnt').textContent = S.receivables.length;
+  document.getElementById('deb-days').textContent = '42';
+
+  const sm = {overdue:{cls:'br',ru:'Просрочено',uz:'Muddati o\'tgan',en:'Overdue'},soon:{cls:'ba',ru:'Скоро срок',uz:'Yaqinlashmoqda',en:'Due Soon'},ok:{cls:'bg',ru:'Норма',uz:'Normal',en:'On Time'}};
+  document.getElementById('deb-body').innerHTML = S.receivables.map(r=>{
+    const s = sm[r.status];
+    return `<tr><td>${r.company}</td><td class="ap">${fmt(r.amount)}</td><td>${r.due}</td><td style="color:${r.days<0?'var(--red)':r.days<7?'var(--amber)':'var(--green)'}">${r.days}</td><td><span class="badge ${s.cls}">${s[S.lang]}</span></td></tr>`;
+  }).join('');
+
+  destroyChart('ch-deb');
+  makeSimpleBar('ch-deb', S.receivables.map(r=>r.company), S.receivables.map(r=>r.amount/1e6),
+    S.receivables.map(r=>r.status==='overdue'?'#E24B4A':r.status==='soon'?'#BA7517':'#1D9E75'), true);
+}
+
+// ═══════════════════════════════════════════════
+// КРЕДИТОРКА
+// ═══════════════════════════════════════════════
+function renderPayables() {
+  const fmt = v=>(v/1e6).toFixed(1)+'M';
+  const total = S.payables.reduce((s,r)=>s+r.amount,0);
+  const overdue = S.payables.filter(r=>r.status==='overdue').reduce((s,r)=>s+r.amount,0);
+  document.getElementById('kred-total').textContent = fmt(total);
+  document.getElementById('kred-overdue').textContent = fmt(overdue);
+  document.getElementById('kred-cnt').textContent = S.payables.length;
+  document.getElementById('kred-next').textContent = '2.4M';
+
+  const ps = {high:{cls:'br',ru:'Высокий',uz:'Yuqori',en:'High'},medium:{cls:'ba',ru:'Средний',uz:'O\'rta',en:'Medium'},low:{cls:'bb',ru:'Низкий',uz:'Past',en:'Low'}};
+  const ss = {overdue:{cls:'br',ru:'Просрочено',uz:'Muddati o\'tgan',en:'Overdue'},soon:{cls:'ba',ru:'Скоро срок',uz:'Yaqinlashmoqda',en:'Due Soon'},ok:{cls:'bg',ru:'Норма',uz:'Normal',en:'On Time'}};
+  document.getElementById('kred-body').innerHTML = S.payables.map(r=>`
+    <tr><td>${r.company}</td><td class="am">${fmt(r.amount)}</td><td>${r.due}</td>
+    <td><span class="badge ${ps[r.priority].cls}">${ps[r.priority][S.lang]}</span></td>
+    <td><span class="badge ${ss[r.status].cls}">${ss[r.status][S.lang]}</span></td></tr>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+// ЗАЙМЫ ВЫДАННЫЕ
+// ═══════════════════════════════════════════════
+function renderLoansOut() {
+  const fmt = v=>(v/1e6).toFixed(2)+'M';
+  document.getElementById('lout-body').innerHTML = S.loans_out.map(l=>{
+    const bal = l.total-l.returned;
+    const st = l.status==='overdue'?'<span class="badge br">Просрочено</span>':'<span class="badge bg">Активный</span>';
+    return `<tr><td>${l.name}</td><td class="ap">${fmt(l.total)}</td><td class="ap">${fmt(l.returned)}</td><td class="${bal>0?'A':'G'}">${fmt(bal)}</td><td>${l.rate}</td><td>${l.due}</td><td>${st}</td></tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+// ЗАЙМЫ ПОЛУЧЕННЫЕ
+// ═══════════════════════════════════════════════
+function renderLoansIn() {
+  const fmt = v=>(v/1e6).toFixed(2)+'M';
+  document.getElementById('lin-body').innerHTML = S.loans_in.map(l=>`
+    <tr><td><b>${l.lender}</b></td><td>${fmt(l.total)}</td><td class="ap">${fmt(l.repaid)}</td><td>${l.rate}</td><td>${fmt(l.monthly)}</td><td>${l.end}</td></tr>`).join('');
+
+  destroyChart('ch-loans');
+  makeStackedBar('ch-loans', S.loans_in.map(l=>l.lender),
+    S.loans_in.map(l=>l.repaid/1e6), S.loans_in.map(l=>(l.total-l.repaid)/1e6));
+}
+
+// ═══════════════════════════════════════════════
+// СПРАВОЧНИК
+// ═══════════════════════════════════════════════
+function renderDir() {
+  const typeMap = {client:'Клиент',supplier:'Поставщик',bank:'Банк',cash:'Касса'};
+  document.getElementById('dir-body').innerHTML = S.directory.map(d=>`
+    <tr><td>${d.name}</td><td><span class="badge bb">${typeMap[d.type]||d.type}</span></td><td style="text-align:right">${d.balance.toLocaleString()}</td></tr>`).join('');
+  // Update contractor selects
+  const sel = document.getElementById('m-contractor');
+  if(sel) sel.innerHTML = S.directory.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+}
+// addDir → defined below with Supabase support
+
+// ═══════════════════════════════════════════════
+// КУРСЫ
+// ═══════════════════════════════════════════════
+function renderRates() {
+  const currencies = ['USD','EUR','RUB'];
+  document.getElementById('rates-list').innerHTML = currencies.map(c=>`
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:50px;font-weight:600">${c}</span>
+      <span style="color:var(--text2);font-size:11px">1 ${c} =</span>
+      <input type="number" id="rate-${c}" value="${S.rates[c]}" style="flex:1;padding:6px;border:1px solid var(--border);border-radius:5px">
+      <span style="color:var(--text2)">UZS</span>
+    </div>`).join('');
+}
+// saveRates → defined below with Supabase support
+
+// ═══════════════════════════════════════════════
+// ИМПОРТ EXCEL
+// ═══════════════════════════════════════════════
+document.getElementById('file-upload').addEventListener('change', function(e) {
+  const file = e.target.files[0]; if(!file) return;
+  notify('⏳ Импортируем...');
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = ev.target.result;
+      let rows = [];
+      if(file.name.endsWith('.csv')) {
+        rows = data.split('\n').map(l=>l.split(/[,;]/).map(c=>c.trim().replace(/"/g,'')));
+      } else {
+        const wb = XLSX.read(data,{type:'binary'});
+        rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false});
+      }
+      const header = rows[0]||[];
+      const start = header.some(h=>typeof h==='string'&&(h.toLowerCase().includes('дат')||h.toLowerCase().includes('date')))?1:0;
+      let added = 0;
+      for(let i=start;i<rows.length;i++) {
+        const r=rows[i]; if(!r||r.length<3) continue;
+        const date=String(r[0]||'').trim();
+        const desc=String(r[1]||'—').trim();
+        const inc=parseFloat(String(r[2]||'').replace(/\s/g,'').replace(',','.'))||0;
+        const exp=parseFloat(String(r[3]||'').replace(/\s/g,'').replace(',','.'))||0;
+        const cur=String(r[4]||'UZS').trim().toUpperCase();
+        const cat=String(r[5]||'Прочее').trim();
+        const type=String(r[6]||'PNL').trim().toUpperCase();
+        if(!date||(!inc&&!exp)) continue;
+        const rate=S.rates[cur]||1;
+        const amount=inc||-exp;
+        const amountUzs=amount*rate;
+        S.transactions.push({date,desc,amount,currency:cur,amountUzs,category:cat,type:['PNL','CF','BAL'].includes(type)?type:'PNL',contractor:'d1'});
+        added++;
+      }
+      notify(`✅ Импортировано ${added} записей`);
+      if (typeof saveCurrentCompany !== 'undefined') saveCurrentCompany();
+      refreshAll();
+    } catch(err) { notify('❌ Ошибка импорта: '+err.message); }
+  };
+  reader[file.name.endsWith('.csv')?'readAsText':'readAsBinaryString'](file);
+  this.value='';
+});
+
+// ═══════════════════════════════════════════════
+// МОДАЛ ОПЕРАЦИЯ
+// ═══════════════════════════════════════════════
+function showManualAddForm() {
+  renderDir();
+  document.getElementById('m-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('modal-op').classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+// saveOp is defined later with auto-save support
+
+// ═══════════════════════════════════════════════
+// ЛИЧНЫЙ КАБИНЕТ
+// ═══════════════════════════════════════════════
+// openCabinet → defined below with Supabase support
+function closeCabinet(e) {
+  if(!e || e.target===document.getElementById('cabinet-overlay'))
+    document.getElementById('cabinet-overlay').classList.remove('open');
+}
+// selectPlan is defined in the auth block below
+
+// ═══════════════════════════════════════════════
+// УВЕДОМЛЕНИЕ
+// ═══════════════════════════════════════════════
+function notify(msg) {
+  const n=document.getElementById('notif');
+  n.textContent=msg; n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'),3000);
+}
+
+// ═══════════════════════════════════════════════
+// УТИЛИТЫ
+// ═══════════════════════════════════════════════
+function setEl(id, txt, cls='') {
+  const el=document.getElementById(id); if(!el) return;
+  el.textContent=txt;
+  el.className='kpi-val '+(cls||'');
+}
+function refreshAll() {
+  const active = document.querySelector('.page.active')?.id?.replace('page-','');
+  if(active) {
+    if(active==='dashboard') refreshDash();
+    if(active==='operations') renderOps();
+    if(active==='pnl') renderPnl();
+    if(active==='cashflow') renderCF();
+    if(active==='balance') renderBalance();
+    if(active==='salary') renderSalary();
+    if(active==='receivables') renderReceivables();
+    if(active==='payables') renderPayables();
+  }
+}
+
+// ═══════════════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════════════
+Chart.defaults.font.family="'Inter',sans-serif";
+Chart.defaults.font.size=11;
+Chart.defaults.color='#6B7280';
+Chart.defaults.plugins.legend.labels.boxWidth=10;
+
+const COLORS=['#1D9E75','#378ADD','#7F77DD','#D85A30','#BA7517','#E24B4A','#5DCAA5','#639922','#D4A01C','#534AB7'];
+
+function destroyChart(id) { if(charts[id]){charts[id].destroy();delete charts[id];} }
+
+function makeDonut(id, labels, data, colors) {
+  const ctx=document.getElementById(id); if(!ctx) return;
+  destroyChart(id);
+  charts[id]=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors||COLORS,borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10}}}},cutout:'62%'}});
+}
+
+function makeSimpleBar(id, labels, data, colors, horizontal=false) {
+  const ctx=document.getElementById(id); if(!ctx) return;
+  destroyChart(id);
+  charts[id]=new Chart(ctx,{type:'bar',
+    data:{labels,datasets:[{data,backgroundColor:colors||COLORS[0],borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:horizontal?'y':'x',
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:!horizontal,color:'#f0f0f0'},ticks:{font:{size:10}}},
+              y:{grid:{display:horizontal,color:'#f0f0f0'},ticks:{font:{size:10}}}}}});
+}
+
+function makeBarLine(id, labels, rev, exp, prf) {
+  const ctx=document.getElementById(id); if(!ctx) return;
+  destroyChart(id);
+  charts[id]=new Chart(ctx,{type:'bar',
+    data:{labels,datasets:[
+      {label:'Выручка',data:rev,backgroundColor:'rgba(29,158,117,0.7)',borderRadius:3},
+      {label:'Расходы',data:exp,backgroundColor:'rgba(226,75,74,0.7)',borderRadius:3},
+      {type:'line',label:'Прибыль',data:prf,borderColor:'#7F77DD',backgroundColor:'rgba(127,119,221,0.1)',tension:.4,fill:true,pointRadius:3,yAxisID:'y'}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{size:10}}}},
+      scales:{x:{grid:{display:false}},y:{grid:{color:'#f0f0f0'}}}}});
+}
+
+function makeStackedBar(id, labels, repaid, remaining) {
+  const ctx=document.getElementById(id); if(!ctx) return;
+  destroyChart(id);
+  charts[id]=new Chart(ctx,{type:'bar',
+    data:{labels,datasets:[
+      {label:'Погашено',data:repaid,backgroundColor:'#1D9E75',borderRadius:4},
+      {label:'Остаток',data:remaining,backgroundColor:'#E24B4A',borderRadius:4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top'}},
+      scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'#f0f0f0'},ticks:{callback:v=>v+'M'}}}}});
+}
+
+function initPageCharts(page) {
+  if(page==='taxes') {
+    destroyChart('ch-tax');
+    makeDonut('ch-tax',['Уплачено','Частично','Не уплачено'],[6.2,0.8,1.9],['#1D9E75','#BA7517','#E24B4A']);
+  }
+}
+
+
+// ═══════════════════════════════════════════════
+// SUPABASE CONFIG — замените на свои данные!
+// ═══════════════════════════════════════════════
+// 1. Зайдите на supabase.com → создайте проект
+// 2. Settings → API → скопируйте URL и anon key
+// 3. Вставьте сюда:
+
+const SUPABASE_URL = 'https://zykqqqtjedsvegtvrapz.supabase.co';       // например: https://xxxx.supabase.co
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5a3FxcXRqZWRzdmVndHZyYXB6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwNjMxNTksImV4cCI6MjA5MTYzOTE1OX0.h93e9I9jN3iPlqSl1lVyfvLYbzpY_NeJsEWk26tLOZs';  // длинный ключ начинается с eyJ...
+
+// ── Supabase клиент (через CDN) ──
+let sb = null;
+function initSupabase() {
+  if (window.supabase) {
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  }
+}
+
+// ── Определяем режим: если нет Supabase → localStorage fallback ──
+function isSupabaseConfigured() {
+  return SUPABASE_URL !== 'YOUR_SUPABASE_URL' && sb !== null;
+}
+
+// ═══════════════════════════════════════════════
+// AUTH FUNCTIONS
+// ═══════════════════════════════════════════════
+let currentUser = null;
+let currentCoId = null;
+let currentProfile = null;
+
+function switchAuthTab(tab) {
+  document.getElementById('auth-login').style.display = tab === 'login' ? '' : 'none';
+  document.getElementById('auth-register').style.display = tab === 'register' ? '' : 'none';
+  document.getElementById('auth-tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('auth-tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('auth-err').textContent = '';
+}
+
+async function doLogin() {
+  const email = document.getElementById('a-email').value.trim().toLowerCase();
+  const pass = document.getElementById('a-pass').value;
+  const errEl = document.getElementById('auth-err');
+  const btn = document.querySelector('#auth-login .auth-btn');
+  if (!email || !pass) { errEl.textContent = 'Введите email и пароль'; return; }
+  btn.textContent = 'Входим...'; btn.disabled = true;
+
+  if (isSupabaseConfigured()) {
+    // ── SUPABASE LOGIN ──
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+    btn.textContent = 'Войти'; btn.disabled = false;
+    if (error) { errEl.textContent = error.message === 'Invalid login credentials' ? 'Неверный email или пароль' : error.message; return; }
+    currentUser = data.user;
+    await loadProfile();
+    await pickFirstCompany();
+    enterApp();
+  } else {
+    // ── LOCALSTORAGE FALLBACK ──
+    btn.textContent = 'Войти'; btn.disabled = false;
+    const users = lsGetUsers();
+    const u = users[email];
+    if (!u || u.password !== pass) { errEl.textContent = 'Неверный email или пароль'; return; }
+    currentUser = { id: email, email };
+    currentProfile = u;
+    currentCoId = u.companies?.[0];
+    if (currentCoId) loadCompanyIntoS(currentCoId);
+    lsSaveSession(email, currentCoId);
+    enterApp();
+  }
+}
+
+async function doRegister() {
+  const companyName = document.getElementById('r-company').value.trim();
+  const email = document.getElementById('r-email').value.trim().toLowerCase();
+  const pass = document.getElementById('r-pass').value;
+  const errEl = document.getElementById('auth-err');
+  const btn = document.querySelector('#auth-register .auth-btn');
+  if (!companyName || !email || !pass) { errEl.textContent = 'Заполните все поля'; return; }
+  if (pass.length < 6) { errEl.textContent = 'Пароль минимум 6 символов'; return; }
+  btn.textContent = 'Создаём...'; btn.disabled = true;
+
+  if (isSupabaseConfigured()) {
+    // ── SUPABASE REGISTER ──
+    const { data, error } = await sb.auth.signUp({ email, password: pass, options: { data: { full_name: companyName } } });
+    btn.textContent = 'Создать аккаунт'; btn.disabled = false;
+    if (error) { errEl.textContent = error.message; return; }
+    if (data.user) {
+      currentUser = data.user;
+      // Create profile
+      await sb.from('profiles').upsert({ id: data.user.id, email, full_name: companyName, plan: 'free', plan_expires: null, is_admin: false });
+      // Create first company
+      const coId = await sbCreateCompany(companyName, 'services');
+      if (coId) { currentCoId = coId; await loadCompanyData(coId); }
+      await loadProfile();
+      enterApp();
+    } else {
+      errEl.textContent = 'Подтвердите email — мы отправили письмо на ' + email;
+    }
+  } else {
+    // ── LOCALSTORAGE FALLBACK ──
+    btn.textContent = 'Создать аккаунт'; btn.disabled = false;
+    const users = lsGetUsers();
+    if (users[email]) { errEl.textContent = 'Email уже зарегистрирован'; return; }
+    const coId = 'co_' + Date.now();
+    users[email] = { email, password: pass, full_name: companyName, plan: 'free', plan_expires: '', is_admin: false, companies: [coId], created_at: new Date().toISOString() };
+    lsSaveUsers(users);
+    const coData = getDefaultCompanyData(coId, companyName, 'services');
+    lsSaveCompany(coId, coData);
+    let reg = lsGetRegistry(); reg[coId] = { id: coId, name: companyName, industry: 'services', owner: email, created_at: new Date().toISOString() }; lsSaveRegistry(reg);
+    currentUser = { id: email, email };
+    currentProfile = users[email];
+    currentCoId = coId;
+    loadCompanyIntoS(coId);
+    lsSaveSession(email, coId);
+    enterApp();
+  }
+}
+
+async function doLogout() {
+  if (isSupabaseConfigured()) { await sb.auth.signOut(); }
+  else { lsClearSession(); }
+  currentUser = null; currentCoId = null; currentProfile = null;
+  closeCabinet();
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('a-email').value = '';
+  document.getElementById('a-pass').value = '';
+  document.getElementById('auth-err').textContent = '';
+}
+
+// ═══════════════════════════════════════════════
+// SUPABASE DB FUNCTIONS
+// ═══════════════════════════════════════════════
+
+async function loadProfile() {
+  if (!isSupabaseConfigured() || !currentUser) return;
+  const { data } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  currentProfile = data;
+}
+
+async function pickFirstCompany() {
+  if (!isSupabaseConfigured() || !currentUser) return;
+  const { data } = await sb.from('companies').select('*').eq('owner_id', currentUser.id).order('created_at').limit(1);
+  if (data && data.length > 0) {
+    currentCoId = data[0].id;
+    await loadCompanyData(currentCoId);
+  } else {
+    // No company yet — create default
+    const coId = await sbCreateCompany('Моя компания', 'services');
+    if (coId) { currentCoId = coId; await loadCompanyData(coId); }
+  }
+}
+
+async function sbCreateCompany(name, industry) {
+  const { data, error } = await sb.from('companies').insert({ name, industry, owner_id: currentUser.id }).select().single();
+  if (error || !data) return null;
+  // Seed with demo data
+  const seed = getDefaultCompanyData(data.id, name, industry);
+  for (const tx of seed.transactions) {
+    await sb.from('transactions').insert({ ...tx, company_id: data.id, user_id: currentUser.id });
+  }
+  for (const d of seed.directory) {
+    await sb.from('directory').insert({ ...d, company_id: data.id, user_id: currentUser.id });
+  }
+  return data.id;
+}
+
+async function loadCompanyData(coId) {
+  if (!isSupabaseConfigured()) return;
+  const [txRes, dirRes, salRes, recRes, payRes, loutRes, linRes, ratesRes] = await Promise.all([
+    sb.from('transactions').select('*').eq('company_id', coId).order('date', { ascending: false }),
+    sb.from('directory').select('*').eq('company_id', coId),
+    sb.from('salary').select('*').eq('company_id', coId),
+    sb.from('receivables').select('*').eq('company_id', coId),
+    sb.from('payables').select('*').eq('company_id', coId),
+    sb.from('loans_out').select('*').eq('company_id', coId),
+    sb.from('loans_in').select('*').eq('company_id', coId),
+    sb.from('company_rates').select('*').eq('company_id', coId),
+  ]);
+  S.transactions = (txRes.data || []).map(t => ({
+    ...t,
+    desc: t.desc || t['desc'],
+    amountUzs: t.amount_uzs ?? t.amountUzs ?? t.amount,
+  }));
+  S.directory = dirRes.data || [];
+  S.salary = salRes.data || [];
+  S.receivables = recRes.data || [];
+  S.payables = payRes.data || [];
+  S.loans_out = loutRes.data || [];
+  S.loans_in = linRes.data || [];
+  if (ratesRes.data && ratesRes.data[0]) {
+    S.rates = { UZS: 1, USD: ratesRes.data[0].usd || 12700, EUR: ratesRes.data[0].eur || 13800, RUB: ratesRes.data[0].rub || 140 };
+  }
+}
+
+async function saveCurrentCompany() {
+  if (!currentCoId) return;
+  if (isSupabaseConfigured()) {
+    // Rates (upsert)
+    await sb.from('company_rates').upsert({ company_id: currentCoId, usd: S.rates.USD, eur: S.rates.EUR, rub: S.rates.RUB }, { onConflict: 'company_id' });
+  } else {
+    // LocalStorage
+    const existing = lsGetCompany(currentCoId) || {};
+    Object.assign(existing, { transactions: S.transactions, directory: S.directory, salary: S.salary, receivables: S.receivables, payables: S.payables, loans_out: S.loans_out, loans_in: S.loans_in, rates: S.rates, filter: activeFilter });
+    lsSaveCompany(currentCoId, existing);
+    lsSaveSession(currentUser.email, currentCoId);
+  }
+}
+
+// ── Transaction save ──
+async function sbSaveTransaction(tx) {
+  if (!isSupabaseConfigured()) return;
+  const row = {
+    company_id:  currentCoId,
+    user_id:     currentUser.id,
+    date:        tx.date,
+    "desc":      tx.desc,
+    amount:      tx.amount,
+    currency:    tx.currency,
+    amount_uzs:  tx.amountUzs,
+    category:    tx.category,
+    type:        tx.type,
+    contractor:  tx.contractor,
+  };
+  const { data } = await sb.from('transactions').insert(row).select().single();
+  return data;
+}
+
+async function sbDeleteTransaction(id) {
+  if (!isSupabaseConfigured()) return;
+  await sb.from('transactions').delete().eq('id', id);
+}
+
+async function sbSaveDirectoryEntry(entry) {
+  if (!isSupabaseConfigured()) return;
+  const { data } = await sb.from('directory').insert({ ...entry, company_id: currentCoId, user_id: currentUser.id }).select().single();
+  return data;
+}
+
+// ═══════════════════════════════════════════════
+// COMPANY SWITCHER
+// ═══════════════════════════════════════════════
+async function openCoSelect() {
+  await renderCoList();
+  document.getElementById('co-select-overlay').classList.add('open');
+}
+
+async function renderCoList() {
+  const list = document.getElementById('co-list');
+  list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2)">Загружаем...</div>';
+  let companies = [];
+  if (isSupabaseConfigured()) {
+    const { data } = await sb.from('companies').select('*').eq('owner_id', currentUser.id).order('created_at');
+    companies = data || [];
+  } else {
+    const reg = lsGetRegistry();
+    const profile = currentProfile;
+    companies = (profile?.companies || []).map(id => reg[id]).filter(Boolean);
+  }
+  const planLimits = { free: 1, pro: 3, business: 10 };
+  const plan = currentProfile?.plan || 'free';
+  const maxCo = planLimits[plan] || 1;
+  list.innerHTML = companies.map(co => {
+    const isActive = co.id === currentCoId;
+    return `<div class="company-card ${isActive ? 'active-co' : ''}" onclick="switchCompany('${co.id}','${co.name}')">
+      <div class="company-ico">${co.name.charAt(0).toUpperCase()}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:var(--text)">${co.name}</div>
+        <div style="font-size:11px;color:var(--text2)">${co.industry || 'services'}${isActive ? ' ✓ Активна' : ''}</div>
+      </div>
+    </div>`;
+  }).join('') + (companies.length < maxCo ? '' : `<p style="font-size:11px;color:var(--text3);text-align:center;padding:8px">Лимит ${maxCo} компаний по тарифу <b>${plan}</b>. <a href="#" onclick="openCabinet();return false;" style="color:var(--green)">Обновить</a></p>`);
+}
+
+async function switchCompany(coId, coName) {
+  if (coId === currentCoId) { document.getElementById('co-select-overlay').classList.remove('open'); return; }
+  await saveCurrentCompany();
+  currentCoId = coId;
+  if (isSupabaseConfigured()) { await loadCompanyData(coId); }
+  else { loadCompanyIntoS(coId); lsSaveSession(currentUser.email, coId); }
+  document.getElementById('co-select-overlay').classList.remove('open');
+  document.getElementById('co-current-name').textContent = coName;
+  updateCabinetUI();
+  refreshAll();
+  nav('dashboard', document.querySelector('.sb-item'));
+  notify('✅ Переключено: ' + coName);
+}
+
+function openAddCompany() {
+  document.getElementById('co-select-overlay').classList.remove('open');
+  document.getElementById('modal-add-company').classList.add('open');
+}
+
+async function addCompany() {
+  const name = document.getElementById('nc-name').value.trim();
+  const industry = document.getElementById('nc-industry').value;
+  if (!name) { notify('Введите название'); return; }
+  const planLimits = { free: 1, pro: 3, business: 10 };
+  const maxCo = planLimits[currentProfile?.plan || 'free'] || 1;
+
+  if (isSupabaseConfigured()) {
+    const { data: existing } = await sb.from('companies').select('id').eq('owner_id', currentUser.id);
+    if ((existing || []).length >= maxCo) { notify('⚠️ Лимит компаний. Обновите тариф.'); closeModal('modal-add-company'); return; }
+    const coId = await sbCreateCompany(name, industry);
+    if (coId) { document.getElementById('nc-name').value = ''; closeModal('modal-add-company'); notify('✅ Компания "' + name + '" создана'); }
+  } else {
+    const reg = lsGetRegistry();
+    const userCos = currentProfile?.companies || [];
+    if (userCos.length >= maxCo) { notify('⚠️ Лимит компаний. Обновите тариф.'); closeModal('modal-add-company'); return; }
+    const coId = 'co_' + Date.now();
+    const coData = getDefaultCompanyData(coId, name, industry);
+    coData.transactions = [];
+    lsSaveCompany(coId, coData);
+    reg[coId] = { id: coId, name, industry, owner: currentUser.email, created_at: new Date().toISOString() };
+    lsSaveRegistry(reg);
+    const users = lsGetUsers();
+    users[currentUser.email].companies.push(coId);
+    lsSaveUsers(users);
+    currentProfile.companies.push(coId);
+    document.getElementById('nc-name').value = '';
+    closeModal('modal-add-company');
+    notify('✅ Компания "' + name + '" создана');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// PROFILE & CABINET UI
+// ═══════════════════════════════════════════════
+function updateTopbarUser() {
+  if (!currentProfile && !currentUser) return;
+  const name = currentProfile?.full_name || currentUser?.email || 'U';
+  const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  document.getElementById('avatar-btn').textContent = initials;
+}
+
+function updateCabinetUI() {
+  if (!currentUser) return;
+  const profile = currentProfile || {};
+  const name = profile.full_name || currentUser.email || '—';
+  const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  document.getElementById('cab-avatar-text').textContent = initials;
+  document.getElementById('cab-name-display').textContent = name;
+  document.getElementById('cab-email-display').textContent = currentUser.email || '—';
+  const plan = profile.plan || 'free';
+  const planNames = { free: 'Free', pro: 'Pro', business: 'Business' };
+  const planFeats = {
+    free: '• 1 компания  • 100 операций  • Только P&L',
+    pro: '✓ 3 компании  ✓ Все отчёты  ✓ Импорт Excel',
+    business: '✓ 10 компаний  ✓ API  ✓ Приоритетная поддержка'
+  };
+  document.getElementById('cab-plan-badge').textContent = planNames[plan] || plan;
+  document.getElementById('cab-plan-name').textContent = 'Текущий план: ' + (planNames[plan] || plan);
+  document.getElementById('cab-plan-expires').textContent = profile.plan_expires ? 'Действует до: ' + profile.plan_expires : (plan === 'free' ? 'Бесплатный' : '—');
+  document.getElementById('cab-plan-features').textContent = planFeats[plan] || '';
+  document.getElementById('cab-tx-cnt').textContent = S.transactions.length;
+  document.getElementById('cab-dir-cnt').textContent = S.directory.length;
+  document.getElementById('cab-lang-val').textContent = (S.lang || 'ru').toUpperCase();
+  document.querySelectorAll('.tariff-card').forEach(c => c.classList.remove('active'));
+  const activeCard = document.querySelector(`.tariff-card[data-plan="${plan}"]`);
+  if (activeCard) activeCard.classList.add('active');
+}
+
+function toggleProfileEdit() {
+  const el = document.getElementById('cab-profile-edit');
+  const shown = el.style.display !== 'none';
+  el.style.display = shown ? 'none' : '';
+  if (!shown) document.getElementById('cab-edit-name').value = currentProfile?.full_name || '';
+}
+
+async function saveProfile() {
+  const newName = document.getElementById('cab-edit-name').value.trim();
+  const oldPass = document.getElementById('cab-edit-oldpass').value;
+  const newPass = document.getElementById('cab-edit-newpass').value;
+  if (!newName) { notify('Введите имя'); return; }
+
+  if (isSupabaseConfigured()) {
+    if (newPass) {
+      if (!oldPass) { notify('Введите текущий пароль'); return; }
+      const { error } = await sb.auth.updateUser({ password: newPass });
+      if (error) { notify('❌ ' + error.message); return; }
+    }
+    await sb.from('profiles').update({ full_name: newName }).eq('id', currentUser.id);
+    if (currentProfile) currentProfile.full_name = newName;
+  } else {
+    const users = lsGetUsers();
+    if (oldPass || newPass) {
+      if (users[currentUser.email]?.password !== oldPass) { notify('❌ Неверный текущий пароль'); return; }
+      if (newPass.length < 6) { notify('❌ Пароль минимум 6 символов'); return; }
+      users[currentUser.email].password = newPass;
+    }
+    users[currentUser.email].full_name = newName;
+    lsSaveUsers(users);
+    if (currentProfile) currentProfile.full_name = newName;
+  }
+  updateTopbarUser();
+  updateCabinetUI();
+  document.getElementById('cab-profile-edit').style.display = 'none';
+  notify('✅ Профиль сохранён');
+}
+
+async function selectPlan(card, plan) {
+  if (isSupabaseConfigured()) {
+    const d = new Date(); d.setFullYear(d.getFullYear() + 1);
+    await sb.from('profiles').update({ plan, plan_expires: d.toISOString().split('T')[0] }).eq('id', currentUser.id);
+    if (currentProfile) { currentProfile.plan = plan; currentProfile.plan_expires = d.toISOString().split('T')[0]; }
+  } else {
+    const users = lsGetUsers();
+    if (users[currentUser.email]) {
+      users[currentUser.email].plan = plan;
+      if (plan !== 'free') { const d = new Date(); d.setFullYear(d.getFullYear() + 1); users[currentUser.email].plan_expires = d.toISOString().split('T')[0]; }
+      lsSaveUsers(users);
+      if (currentProfile) currentProfile.plan = plan;
+    }
+  }
+  document.querySelectorAll('.tariff-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+  updateCabinetUI();
+  notify('✅ Тариф "' + plan + '" активирован');
+}
+
+function openCabinet() {
+  document.getElementById('cabinet-overlay').classList.add('open');
+  updateCabinetUI();
+}
+
+// ═══════════════════════════════════════════════
+// DARK / LIGHT THEME
+// ═══════════════════════════════════════════════
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const newTheme = isDark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('hisobchi_theme', newTheme);
+  updateThemeButtons(newTheme);
+}
+function updateThemeButtons(theme) {
+  const btn = document.getElementById('theme-toggle-btn');
+  const icon = document.getElementById('theme-icon-cab');
+  const label = document.getElementById('theme-label-cab');
+  if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+  if (icon) icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+  if (label) label.textContent = theme === 'dark' ? 'Светлая тема' : 'Тёмная тема';
+}
+function applyStoredTheme() {
+  const theme = localStorage.getItem('hisobchi_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  updateThemeButtons(theme);
+}
+
+// ═══════════════════════════════════════════════
+// ADMIN PANEL
+// ═══════════════════════════════════════════════
+async function refreshAdminPage() {
+  if (!currentProfile?.is_admin) return;
+  let users = [], companies = [];
+  if (isSupabaseConfigured()) {
+    const [uRes, cRes] = await Promise.all([
+      sb.from('profiles').select('*'),
+      sb.from('companies').select('*'),
+    ]);
+    users = uRes.data || [];
+    companies = cRes.data || [];
+  } else {
+    const usersObj = lsGetUsers();
+    users = Object.values(usersObj).map(u => ({ ...u, id: u.email }));
+    const reg = lsGetRegistry();
+    companies = Object.values(reg);
+  }
+  document.getElementById('adm-users-cnt').textContent = users.length;
+  document.getElementById('adm-co-cnt').textContent = companies.length;
+  document.getElementById('adm-pro-cnt').textContent = users.filter(u => u.plan === 'pro').length;
+  document.getElementById('adm-biz-cnt').textContent = users.filter(u => u.plan === 'business').length;
+  let totalTx = 0;
+  if (!isSupabaseConfigured()) {
+    companies.forEach(co => { const d = lsGetCompany(co.id); if (d) totalTx += (d.transactions || []).length; });
+  } else {
+    const { count } = await sb.from('transactions').select('*', { count: 'exact', head: true });
+    totalTx = count || 0;
+  }
+  document.getElementById('adm-tx-cnt').textContent = totalTx;
+  const pb = p => ({ free: '<span class="plan-badge-sm pb-free">Free</span>', pro: '<span class="plan-badge-sm pb-pro">Pro</span>', business: '<span class="plan-badge-sm pb-biz">Business</span>' }[p] || p);
+  document.getElementById('adm-users-body').innerHTML = users.map(u => `<tr>
+    <td><b>${u.full_name || '—'}</b>${u.is_admin ? ' <span class="badge br" style="font-size:9px">ADMIN</span>' : ''}</td>
+    <td>${u.email}</td>
+    <td>${pb(u.plan || 'free')}</td>
+    <td>${u.plan_expires || '—'}</td>
+    <td>
+      <button class="btn-sm" style="font-size:10px;padding:3px 7px" onclick="adminQuickPlan('${u.email || u.id}','pro')">→ Pro</button>
+      <button class="btn-sm" style="font-size:10px;padding:3px 7px;margin-left:3px" onclick="adminQuickPlan('${u.email || u.id}','business')">→ Biz</button>
+    </td></tr>`).join('');
+  document.getElementById('adm-companies-body').innerHTML = companies.map(co => `<tr>
+    <td><b>${co.name}</b></td>
+    <td>${co.owner || co.owner_id || '—'}</td>
+    <td>${co.industry || '—'}</td>
+    <td>${co.created_at ? co.created_at.split('T')[0] : '—'}</td>
+    <td><button class="btn-sm" style="font-size:10px;padding:3px 7px;background:#FCEBEB;color:#a32d2d;border-color:#E24B4A" onclick="adminDeleteCompany('${co.id}')">Удалить</button></td></tr>`).join('');
+  const settings = lsGetAdminSettings();
+  document.getElementById('adm-free-limit').value = settings.freeTxLimit;
+  document.getElementById('adm-free-co').value = settings.freeCoLimit;
+  document.getElementById('adm-pro-price').value = settings.proPrice;
+  document.getElementById('adm-biz-price').value = settings.bizPrice;
+}
+
+function saveAdminSettings() {
+  lsSaveAdminSettings({ freeTxLimit: +document.getElementById('adm-free-limit').value || 100, freeCoLimit: +document.getElementById('adm-free-co').value || 1, proPrice: +document.getElementById('adm-pro-price').value || 29, bizPrice: +document.getElementById('adm-biz-price').value || 79 });
+  notify('✅ Настройки сохранены');
+}
+
+async function adminChangePlan() {
+  const email = document.getElementById('adm-target-email').value.trim().toLowerCase();
+  const plan = document.getElementById('adm-new-plan').value;
+  const expires = document.getElementById('adm-plan-expires').value;
+  if (!email) { notify('Введите email'); return; }
+  await adminSetPlan(email, plan, expires);
+  notify('✅ Тариф обновлён для ' + email);
+  refreshAdminPage();
+}
+
+async function adminQuickPlan(emailOrId, plan) {
+  const d = new Date(); d.setFullYear(d.getFullYear() + 1);
+  await adminSetPlan(emailOrId, plan, d.toISOString().split('T')[0]);
+  notify('✅ Тариф "' + plan + '" назначен');
+  refreshAdminPage();
+}
+
+async function adminSetPlan(emailOrId, plan, expires) {
+  if (isSupabaseConfigured()) {
+    const upd = { plan };
+    if (expires) upd.plan_expires = expires;
+    await sb.from('profiles').update(upd).eq('email', emailOrId);
+  } else {
+    const users = lsGetUsers();
+    if (users[emailOrId]) { users[emailOrId].plan = plan; if (expires) users[emailOrId].plan_expires = expires; lsSaveUsers(users); }
+  }
+}
+
+async function adminDeleteUser() {
+  const email = document.getElementById('adm-del-email').value.trim().toLowerCase();
+  if (!email) { notify('Введите email'); return; }
+  if (email === currentUser?.email) { notify('❌ Нельзя удалить себя'); return; }
+  if (!confirm('Удалить ' + email + '? Все данные будут удалены.')) return;
+  if (isSupabaseConfigured()) {
+    const { data: prof } = await sb.from('profiles').select('id').eq('email', email).single();
+    if (prof) {
+      await sb.from('transactions').delete().eq('user_id', prof.id);
+      await sb.from('directory').delete().eq('user_id', prof.id);
+      await sb.from('companies').delete().eq('owner_id', prof.id);
+      await sb.from('profiles').delete().eq('id', prof.id);
+    }
+  } else {
+    const users = lsGetUsers();
+    (users[email]?.companies || []).forEach(cid => { localStorage.removeItem('hisobchi_co_' + cid); const r = lsGetRegistry(); delete r[cid]; lsSaveRegistry(r); });
+    delete users[email]; lsSaveUsers(users);
+  }
+  notify('✅ Пользователь удалён'); refreshAdminPage();
+}
+
+async function adminResetData() {
+  const email = document.getElementById('adm-del-email').value.trim().toLowerCase();
+  if (!email || !confirm('Сбросить все данные ' + email + '?')) return;
+  if (isSupabaseConfigured()) {
+    const { data: prof } = await sb.from('profiles').select('id').eq('email', email).single();
+    if (prof) { await sb.from('transactions').delete().eq('user_id', prof.id); await sb.from('directory').delete().eq('user_id', prof.id); }
+  } else {
+    const users = lsGetUsers();
+    (users[email]?.companies || []).forEach(cid => { const r = lsGetRegistry(); if (r[cid]) lsSaveCompany(cid, getDefaultCompanyData(cid, r[cid].name, r[cid].industry)); });
+  }
+  notify('✅ Данные сброшены');
+}
+
+async function adminDeleteCompany(coId) {
+  if (!confirm('Удалить компанию?')) return;
+  if (isSupabaseConfigured()) {
+    await sb.from('transactions').delete().eq('company_id', coId);
+    await sb.from('directory').delete().eq('company_id', coId);
+    await sb.from('companies').delete().eq('id', coId);
+  } else {
+    const r = lsGetRegistry(); delete r[coId]; lsSaveRegistry(r); localStorage.removeItem('hisobchi_co_' + coId);
+  }
+  notify('✅ Компания удалена'); refreshAdminPage();
+}
+
+// ═══════════════════════════════════════════════
+// LOCALSTORAGE FALLBACK HELPERS
+// ═══════════════════════════════════════════════
+function lsGetUsers() { try { return JSON.parse(localStorage.getItem('hisob_users') || '{}'); } catch { return {}; } }
+function lsSaveUsers(u) { localStorage.setItem('hisob_users', JSON.stringify(u)); }
+function lsGetRegistry() { try { return JSON.parse(localStorage.getItem('hisob_reg') || '{}'); } catch { return {}; } }
+function lsSaveRegistry(r) { localStorage.setItem('hisob_reg', JSON.stringify(r)); }
+function lsGetCompany(id) { try { return JSON.parse(localStorage.getItem('hisob_co_' + id) || 'null'); } catch { return null; } }
+function lsSaveCompany(id, d) { localStorage.setItem('hisob_co_' + id, JSON.stringify(d)); }
+function lsSaveSession(email, coId) { localStorage.setItem('hisob_sess', JSON.stringify({ email, coId })); }
+function lsGetSession() { try { return JSON.parse(localStorage.getItem('hisob_sess') || 'null'); } catch { return null; } }
+function lsClearSession() { localStorage.removeItem('hisob_sess'); }
+function lsGetAdminSettings() { try { return JSON.parse(localStorage.getItem('hisob_settings') || '{"freeTxLimit":100,"freeCoLimit":1,"proPrice":29,"bizPrice":79}'); } catch { return { freeTxLimit: 100, freeCoLimit: 1, proPrice: 29, bizPrice: 79 }; } }
+function lsSaveAdminSettings(s) { localStorage.setItem('hisob_settings', JSON.stringify(s)); }
+
+function loadCompanyIntoS(coId) {
+  const data = lsGetCompany(coId);
+  if (!data) return;
+  S.transactions = data.transactions || [];
+  S.directory = data.directory || [];
+  S.salary = data.salary || [];
+  S.receivables = data.receivables || [];
+  S.payables = data.payables || [];
+  S.loans_out = data.loans_out || [];
+  S.loans_in = data.loans_in || [];
+  S.rates = data.rates || { UZS: 1, USD: 12700, EUR: 13800, RUB: 140 };
+  if (data.filter) activeFilter = data.filter;
+}
+
+function initLsDemo() {
+  const users = lsGetUsers();
+  if (!users['demo@hisobchi.uz']) {
+    const coId = 'co_demo1';
+    users['demo@hisobchi.uz'] = { email: 'demo@hisobchi.uz', password: 'demo123', full_name: 'Demo User', plan: 'pro', plan_expires: '2026-12-31', is_admin: false, companies: [coId], created_at: new Date().toISOString() };
+    users['admin@hisobchi.uz'] = { email: 'admin@hisobchi.uz', password: 'admin123', full_name: 'Admin', plan: 'business', plan_expires: '2099-12-31', is_admin: true, companies: ['co_admin1'], created_at: new Date().toISOString() };
+    lsSaveUsers(users);
+    lsSaveCompany(coId, getDefaultCompanyData(coId, 'Demo Company', 'services'));
+    lsSaveCompany('co_admin1', getDefaultCompanyData('co_admin1', 'Admin Company', 'services'));
+    const reg = lsGetRegistry();
+    reg[coId] = { id: coId, name: 'Demo Company', industry: 'services', owner: 'demo@hisobchi.uz', created_at: new Date().toISOString() };
+    reg['co_admin1'] = { id: 'co_admin1', name: 'Admin Company', industry: 'services', owner: 'admin@hisobchi.uz', created_at: new Date().toISOString() };
+    lsSaveRegistry(reg);
+  }
+}
+
+function getDefaultCompanyData(id, name, industry) {
+  return {
+    id, name, industry,
+    rates: { UZS: 1, USD: 12700, EUR: 13800, RUB: 140 },
+    transactions: [
+      { id: 't1', date: '2025-06-01', desc: 'Продажа товара', amount: 25000000, currency: 'UZS', amountUzs: 25000000, category: 'Выручка от продаж', type: 'PNL', contractor: 'd1' },
+      { id: 't2', date: '2025-06-03', desc: 'Продажа услуг', amount: 12000000, currency: 'UZS', amountUzs: 12000000, category: 'Выручка от услуг', type: 'PNL', contractor: 'd1' },
+      { id: 't3', date: '2025-06-05', desc: 'Аренда офиса', amount: -3500000, currency: 'UZS', amountUzs: -3500000, category: 'Аренда', type: 'PNL', contractor: 'd2' },
+      { id: 't4', date: '2025-06-08', desc: 'Зарплата', amount: -12200000, currency: 'UZS', amountUzs: -12200000, category: 'Зарплата', type: 'PNL', contractor: 'd2' },
+      { id: 't5', date: '2025-06-12', desc: 'Поступление от клиента', amount: 18000000, currency: 'UZS', amountUzs: 18000000, category: 'Выручка от продаж', type: 'CF', contractor: 'd1' },
+      { id: 't6', date: '2025-06-15', desc: 'Оплата поставщику', amount: -8500000, currency: 'UZS', amountUzs: -8500000, category: 'Себестоимость товара', type: 'CF', contractor: 'd2' },
+    ],
+    directory: [
+      { id: 'd1', name: 'ООО Ромашка', type: 'client', balance: 0 },
+      { id: 'd2', name: 'ИП Иванов', type: 'supplier', balance: 0 },
+      { id: 'd3', name: 'Основной счёт (UZS)', type: 'bank', balance: 10000000 },
+    ],
+    salary: [
+      { name: 'Алиев Жасур', dept: 'Продажи', salary: 3500000, bonus: 450000, status: 'paid' },
+      { name: 'Каримова Дилноза', dept: 'Логистика', salary: 2800000, bonus: 0, status: 'paid' },
+      { name: 'Тошматов Бобур', dept: 'Продажи', salary: 3200000, bonus: 200000, status: 'partial' },
+      { name: 'Назарова Феруза', dept: 'Бухгалтерия', salary: 2500000, bonus: 0, status: 'unpaid' },
+    ],
+    receivables: [
+      { company: 'Alfa Trade LLC', amount: 8200000, due: '2025-06-15', days: -12, status: 'overdue' },
+      { company: 'Beta Logistics', amount: 5600000, due: '2025-06-30', days: 3, status: 'soon' },
+      { company: 'Gamma Service', amount: 4100000, due: '2025-07-15', days: 18, status: 'ok' },
+    ],
+    payables: [
+      { company: 'SupplyCo UZ', amount: 3100000, due: '2025-06-10', priority: 'high', status: 'overdue' },
+      { company: 'Optom Baza', amount: 2400000, due: '2025-07-01', priority: 'medium', status: 'soon' },
+    ],
+    loans_out: [
+      { name: 'Рахимов Дилшод', total: 2000000, returned: 1500000, rate: '0%', due: '2025-09-01', status: 'active' },
+    ],
+    loans_in: [
+      { lender: 'Капиталбанк', total: 20000000, repaid: 13500000, rate: '22%', monthly: 800000, end: '2027-01' },
+    ],
+  };
+}
+
+// ── Patch saveOp to also persist ──
+function saveOp() {
+  const date = document.getElementById('m-date').value;
+  const desc = document.getElementById('m-desc').value.trim();
+  if (!date || !desc) return notify('Заполните дату и описание');
+  const inc = parseFloat(document.getElementById('m-inc').value) || 0;
+  const exp = parseFloat(document.getElementById('m-exp').value) || 0;
+  const cur = document.getElementById('m-cur').value;
+  const cat = document.getElementById('m-cat').value || 'Прочее';
+  const type = document.getElementById('m-type').value;
+  const contr = document.getElementById('m-contractor').value;
+  const rate = S.rates[cur] || 1;
+  const amount = inc || -exp;
+  const tx = { id: 'tx_' + Date.now(), date, desc, amount, currency: cur, amountUzs: amount * rate, category: cat, type, contractor: contr };
+  S.transactions.push(tx);
+  if (isSupabaseConfigured()) sbSaveTransaction(tx);
+  else saveCurrentCompany();
+  closeModal('modal-op');
+  document.getElementById('m-desc').value = '';
+  document.getElementById('m-inc').value = '';
+  document.getElementById('m-exp').value = '';
+  document.getElementById('m-cat').value = '';
+  notify('✅ Операция добавлена');
+  refreshAll();
+}
+
+// ── Patch addDir to persist ──
+function addDir() {
+  const name = document.getElementById('dir-name').value.trim();
+  const type = document.getElementById('dir-type').value;
+  if (!name) return notify('Введите наименование');
+  const entry = { id: 'd' + Date.now(), name, type, balance: 0 };
+  S.directory.push(entry);
+  document.getElementById('dir-name').value = '';
+  if (isSupabaseConfigured()) sbSaveDirectoryEntry(entry);
+  else saveCurrentCompany();
+  renderDir();
+  notify('Контрагент добавлен');
+}
+
+// ── Patch saveRates to persist ──
+function saveRates() {
+  ['USD', 'EUR', 'RUB'].forEach(c => { const el = document.getElementById('rate-' + c); if (el) S.rates[c] = parseFloat(el.value) || S.rates[c]; });
+  saveCurrentCompany();
+  notify('Курсы сохранены');
+}
+
+function enterApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  applyStoredTheme();
+  updateTopbarUser();
+  updateCabinetUI();
+  if (currentProfile?.is_admin) document.getElementById('sb-admin-sec').style.display = '';
+  refreshAll();
+  nav('dashboard', document.querySelector('.sb-item'));
+  const registry = lsGetRegistry();
+  const coName = isSupabaseConfigured() ? (currentCoId || 'Компания') : (registry[currentCoId]?.name || 'Компания');
+  document.getElementById('co-current-name').textContent = typeof coName === 'string' ? coName : 'Компания';
+}
+
+
+// ═══════════════════════════════════════════════
+// PAYMENT — PAYME & CLICK
+// ═══════════════════════════════════════════════
+
+// !! ЗАМЕНИТЕ НА СВОИ ID !!
+const PAYMENT_CONFIG = {
+  payme: {
+    merchant_id: 'YOUR_PAYME_MERCHANT_ID',    // из кабинета merchant.payme.uz
+    endpoint: 'https://checkout.paycom.uz',    // test: https://test.paycom.uz
+  },
+  click: {
+    service_id: 'YOUR_CLICK_SERVICE_ID',       // из кабинета my.click.uz
+    merchant_id: 'YOUR_CLICK_MERCHANT_ID',
+    endpoint: 'https://my.click.uz/services/pay',
+  },
+  // Цены в тийинах (сум × 100)
+  prices: {
+    pro:      { uzs: 349000, tiyin: 34900000, label: 'Pro — 349 000 сум/мес' },
+    business: { uzs: 890000, tiyin: 89000000, label: 'Business — 890 000 сум/мес' },
+  }
+};
+
+function openPayment(plan, method) {
+  closeCabinet();
+  const price = PAYMENT_CONFIG.prices[plan];
+  const title = document.getElementById('pay-modal-title');
+  const content = document.getElementById('pay-modal-content');
+  title.textContent = (method === 'payme' ? 'Оплата через Payme' : 'Оплата через Click') + ' — ' + (plan === 'pro' ? 'Pro' : 'Business');
+
+  // Generate unique order ID
+  const orderId = 'hisob_' + (currentUser?.id || 'guest').slice(0,8) + '_' + Date.now();
+  const userEmail = currentUser?.email || '';
+
+  // Order summary
+  const summaryHtml = `
+    <div class="pay-info">
+      <div class="pay-info-row"><span>Тариф</span><span><b>${plan === 'pro' ? 'Pro' : 'Business'}</b></span></div>
+      <div class="pay-info-row"><span>Период</span><span>1 месяц</span></div>
+      <div class="pay-info-row"><span>Email</span><span>${userEmail}</span></div>
+      <div class="pay-info-row"><span>Сумма</span><span><b>${price.uzs.toLocaleString()} сум</b></span></div>
+    </div>`;
+
+  if (method === 'payme') {
+    // Payme checkout URL
+    const params = btoa(JSON.stringify({
+      m:  PAYMENT_CONFIG.payme.merchant_id,
+      ac: { order_id: orderId, email: userEmail, plan: plan },
+      a:  price.tiyin,
+      l:  'ru',
+    }));
+    const payUrl = PAYMENT_CONFIG.payme.endpoint + '/' + params;
+    const isConfigured = PAYMENT_CONFIG.payme.merchant_id !== 'YOUR_PAYME_MERCHANT_ID';
+
+    content.innerHTML = summaryHtml + (isConfigured ? `
+      <div class="pay-steps">
+        <div class="pay-step"><div class="pay-step-num">1</div><div class="pay-step-txt">Нажмите кнопку — откроется страница оплаты Payme</div></div>
+        <div class="pay-step"><div class="pay-step-num">2</div><div class="pay-step-txt">Введите данные карты Uzcard/Humo или войдите в Payme</div></div>
+        <div class="pay-step"><div class="pay-step-num">3</div><div class="pay-step-txt">После оплаты вернитесь — подписка активируется автоматически</div></div>
+      </div>
+      <button class="pay-btn-big pay-payme" onclick="window.open('${payUrl}','_blank');startPaymentCheck('${orderId}','${plan}')">
+        Оплатить ${price.uzs.toLocaleString()} сум через Payme →
+      </button>
+      <div class="manual-check">✋ Уже оплатили? <a href="#" onclick="manualActivate('${plan}');return false;" style="color:var(--green-d);font-weight:700">Нажмите сюда</a> — мы активируем подписку вручную в течение нескольких минут.</div>
+    ` : `
+      <div style="background:var(--amber-l);border:1px solid var(--amber);border-radius:8px;padding:14px;margin-bottom:14px">
+        <div style="font-weight:700;margin-bottom:6px">⚙️ Payme не настроен</div>
+        <div style="font-size:12px;color:var(--text2)">Для подключения оплаты:<br>
+        1. Зарегистрируйтесь на <b>merchant.payme.uz</b><br>
+        2. Получите Merchant ID<br>
+        3. Вставьте в файл: <code>PAYMENT_CONFIG.payme.merchant_id</code>
+        </div>
+      </div>
+      ${getPaymeSetupGuide()}
+    `);
+
+  } else if (method === 'click') {
+    const isConfigured = PAYMENT_CONFIG.click.service_id !== 'YOUR_CLICK_SERVICE_ID';
+    const clickUrl = isConfigured
+      ? `${PAYMENT_CONFIG.click.endpoint}?service_id=${PAYMENT_CONFIG.click.service_id}&merchant_id=${PAYMENT_CONFIG.click.merchant_id}&amount=${price.uzs}&transaction_param=${orderId}&return_url=${encodeURIComponent(location.href)}`
+      : '#';
+
+    content.innerHTML = summaryHtml + (isConfigured ? `
+      <div class="pay-steps">
+        <div class="pay-step"><div class="pay-step-num">1</div><div class="pay-step-txt">Нажмите — откроется страница CLICK</div></div>
+        <div class="pay-step"><div class="pay-step-num">2</div><div class="pay-step-txt">Войдите в CLICK или оплатите картой</div></div>
+        <div class="pay-step"><div class="pay-step-num">3</div><div class="pay-step-txt">После оплаты подписка активируется автоматически</div></div>
+      </div>
+      <button class="pay-btn-big pay-click" onclick="window.open('${clickUrl}','_blank');startPaymentCheck('${orderId}','${plan}')">
+        Оплатить ${price.uzs.toLocaleString()} сум через CLICK →
+      </button>
+      <div class="manual-check">✋ Уже оплатили? <a href="#" onclick="manualActivate('${plan}');return false;" style="color:var(--green-d);font-weight:700">Нажмите сюда</a> — активируем вручную.</div>
+    ` : `
+      <div style="background:var(--amber-l);border:1px solid var(--amber);border-radius:8px;padding:14px;margin-bottom:14px">
+        <div style="font-weight:700;margin-bottom:6px">⚙️ CLICK не настроен</div>
+        <div style="font-size:12px;color:var(--text2)">1. Зарегистрируйтесь на <b>my.click.uz</b> → Merchant<br>
+        2. Создайте сервис, получите Service ID и Merchant ID<br>
+        3. Вставьте в: <code>PAYMENT_CONFIG.click</code>
+        </div>
+      </div>
+      ${getClickSetupGuide()}
+    `);
+  }
+
+  document.getElementById('modal-payment').classList.add('open');
+}
+
+function getPaymeSetupGuide() {
+  return `<div style="font-size:11px;color:var(--text2);background:var(--bg);border-radius:8px;padding:12px">
+    <b>Как подключить Payme:</b><br>
+    1. merchant.payme.uz → Регистрация бизнеса<br>
+    2. Добавьте сервис → получите <b>Merchant ID</b><br>
+    3. Укажите Callback URL: <code>${location.origin}/payment/payme</code><br>
+    4. Вставьте ID в файл → сайт начнёт принимать платежи
+  </div>`;
+}
+
+function getClickSetupGuide() {
+  return `<div style="font-size:11px;color:var(--text2);background:var(--bg);border-radius:8px;padding:12px">
+    <b>Как подключить CLICK:</b><br>
+    1. my.click.uz → Мои сервисы → Новый сервис<br>
+    2. Тип: <b>SHOP</b> → получите Service ID + Merchant ID<br>
+    3. Укажите Return URL: <code>${location.href}</code><br>
+    4. Вставьте ID в файл
+  </div>`;
+}
+
+// Polling — проверяем оплату каждые 5 сек (через Supabase)
+let paymentPollTimer = null;
+function startPaymentCheck(orderId, plan) {
+  if (!isSupabaseConfigured()) return;
+  let attempts = 0;
+  notify('⏳ Ожидаем подтверждения оплаты...');
+  paymentPollTimer = setInterval(async () => {
+    attempts++;
+    if (attempts > 36) { clearInterval(paymentPollTimer); return; } // 3 минуты
+    const { data } = await sb.from('payments').select('*').eq('order_id', orderId).eq('status', 'paid').single();
+    if (data) {
+      clearInterval(paymentPollTimer);
+      await activatePlan(plan);
+      closeModal('modal-payment');
+      notify('🎉 Оплата прошла! Тариф ' + plan + ' активирован');
+    }
+  }, 5000);
+}
+
+async function activatePlan(plan) {
+  const d = new Date(); d.setMonth(d.getMonth() + 1);
+  const expires = d.toISOString().split('T')[0];
+  if (isSupabaseConfigured()) {
+    await sb.from('profiles').update({ plan, plan_expires: expires }).eq('id', currentUser.id);
+  } else {
+    const users = lsGetUsers();
+    if (users[currentUser.email]) { users[currentUser.email].plan = plan; users[currentUser.email].plan_expires = expires; lsSaveUsers(users); }
+  }
+  if (currentProfile) { currentProfile.plan = plan; currentProfile.plan_expires = expires; }
+  updateCabinetUI();
+}
+
+// Ручная активация (пока нет автоматики)
+async function manualActivate(plan) {
+  // Записываем запрос в Supabase — вы вручную проверите и активируете
+  if (isSupabaseConfigured()) {
+    await sb.from('payment_requests').insert({
+      user_id: currentUser.id,
+      email: currentUser.email,
+      plan: plan,
+      amount: PAYMENT_CONFIG.prices[plan].uzs,
+      status: 'pending',
+      created_at: new Date().toISOString()
+    }).select();
+  }
+  closeModal('modal-payment');
+  notify('📨 Запрос отправлен. Активируем в течение нескольких минут!');
+}
+
+// Admin: быстро активировать оплату пользователю
+async function adminActivatePayment(email, plan) {
+  await adminSetPlan(email, plan, (() => { const d = new Date(); d.setMonth(d.getMonth()+1); return d.toISOString().split('T')[0]; })());
+  if (isSupabaseConfigured()) {
+    await sb.from('payment_requests').update({ status: 'activated' }).eq('email', email).eq('status', 'pending');
+  }
+  notify('✅ Подписка активирована для ' + email);
+  refreshAdminPage();
+}
+
+
+async function loadPaymentRequests() {
+  const tbody = document.getElementById('adm-payments-body');
+  if (!tbody) return;
+  if (!isSupabaseConfigured()) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3)">Доступно только с Supabase</td></tr>';
+    return;
+  }
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Загружаем...</td></tr>';
+  const { data } = await sb.from('payment_requests').select('*').order('created_at', { ascending: false }).limit(50);
+  if (!data || data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3)">Запросов нет</td></tr>';
+    return;
+  }
+  const statusLabel = { pending: '<span class="badge ba">Ожидает</span>', activated: '<span class="badge bg">Активирован</span>', rejected: '<span class="badge br">Отклонён</span>' };
+  tbody.innerHTML = data.map(p => `<tr>
+    <td>${p.email}</td>
+    <td><b>${p.plan}</b></td>
+    <td>${(p.amount||0).toLocaleString()} сум</td>
+    <td>${p.created_at ? p.created_at.split('T')[0] : '—'}</td>
+    <td>${statusLabel[p.status] || p.status}</td>
+    <td>${p.status === 'pending' ? `<button class="btn-sm btn-green" style="font-size:10px;padding:3px 8px" onclick="adminActivatePayment('${p.email}','${p.plan}')">✅ Активировать</button>` : '—'}</td>
+  </tr>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════
+(async function boot() {
+  applyStoredTheme();
+  initSupabase();
+
+  if (isSupabaseConfigured()) {
+    // ── SUPABASE MODE ──
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      currentUser = session.user;
+      await loadProfile();
+      await pickFirstCompany();
+      enterApp();
+    } else {
+      document.getElementById('auth-screen').style.display = 'flex';
+    }
+    // Listen for auth changes
+    sb.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT') { doLogout(); }
+    });
+  } else {
+    // ── LOCALSTORAGE MODE ──
+    initLsDemo();
+    const sess = lsGetSession();
+    if (sess) {
+      const users = lsGetUsers();
+      const u = users[sess.email];
+      if (u) {
+        currentUser = { id: sess.email, email: sess.email };
+        currentProfile = u;
+        currentCoId = sess.coId || u.companies?.[0];
+        if (currentCoId) loadCompanyIntoS(currentCoId);
+        enterApp();
+        return;
+      }
+    }
+    document.getElementById('auth-screen').style.display = 'flex';
+  }
+})();
+
+
+</script>
+</body>
+</html>
